@@ -1,0 +1,1 @@
+{"scripts":{"postinstall":"node scripts-copy-wasm.mjs","dev":"vite","build":"tsc --noEmit && vite build"},"dependencies":{"occt-import-js":"latest","lucide-react":"latest","react":"latest","react-dom":"latest","three":"latest","vite":"latest"},"devDependencies":{"@types/react":"latest","@types/react-dom":"latest","@types/three":"latest","typescript":"latest"},"type":"module"}

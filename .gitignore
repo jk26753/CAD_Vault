@@ -1,0 +1,87 @@
+# ==========================================
+# Python
+# ==========================================
+
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Python virtual environments
+.venv/
+venv/
+env/
+
+
+# ==========================================
+# Node / React
+# ==========================================
+
+node_modules/
+
+# Frontend build output
+dist/
+build/
+
+
+# ==========================================
+# Environment / secrets
+# ==========================================
+
+.env
+.env.*
+!.env.example
+
+
+# ==========================================
+# Databases
+# ==========================================
+
+*.db
+*.sqlite
+*.sqlite3
+
+
+# ==========================================
+# Logs / temporary files
+# ==========================================
+
+*.log
+*.tmp
+*.temp
+
+
+# ==========================================
+# VS Code / IDE
+# ==========================================
+
+.vscode/
+.idea/
+
+
+# ==========================================
+# Windows / macOS
+# ==========================================
+
+Thumbs.db
+desktop.ini
+.DS_Store
+
+
+# ==========================================
+# Old project copies / backups
+# ==========================================
+
+BACKUP_10_28_26/
+CopilotUpload/
+CopilotUpload.zip
+model-vault-fastapi-react-sqlite-v8 (2).zip
+
+# ==========================================
+# CAD Vault application data
+# ==========================================
+
+# Live SQLite database / application data
+data/
+
+# Uploaded model files and generated previews
+vault/
