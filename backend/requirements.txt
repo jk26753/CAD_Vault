@@ -3,3 +3,4 @@ uvicorn[standard]==0.32.1
 sqlalchemy==2.0.36
 pydantic-settings==2.6.1
 python-multipart==0.0.17
+pywin32>=308; sys_platform == "win32"
