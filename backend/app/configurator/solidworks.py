@@ -16,7 +16,7 @@ def rebuild() -> str:
         import pythoncom
         import win32com.client
     except ImportError as e:
-        raise RuntimeError("pywin32 is not installed (Windows only)") from e
+        raise RuntimeError(f"pywin32 is not installed or failed to load ({e})") from e
 
     with _lock:
         # FastAPI runs sync endpoints on worker threads, which need COM initialized.
