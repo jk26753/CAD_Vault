@@ -30,6 +30,7 @@ build/
 .env
 .env.*
 !.env.example
+configurator.env
 
 
 # ==========================================

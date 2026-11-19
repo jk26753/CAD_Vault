@@ -1,0 +1,27 @@
+.toolTabs {
+  gap: 6px;
+}
+
+.toolTabs a {
+  border-color: transparent;
+  background: transparent;
+  color: #9fb0c5;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.toolTabs a:hover {
+  color: #e5edf7;
+  background: #151c28;
+}
+
+.toolTabs a.on {
+  color: #e5edf7;
+  background: #151c28;
+  border-color: #344154;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+}
