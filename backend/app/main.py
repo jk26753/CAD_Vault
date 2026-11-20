@@ -3,6 +3,7 @@ import re,shutil,zipfile
 from fastapi import FastAPI,Depends,HTTPException,UploadFile,File as FFile,Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select,or_,text
 from sqlalchemy.orm import Session,selectinload
 from pydantic import BaseModel
@@ -20,7 +21,8 @@ def output(m):return {'id':m.id,'part_number':m.part_number,'name':m.name,'desig
 @app.get('/api/models')
 def models(qs:str='',db:Session=Depends(get_db)):
  s=query()
- if qs:t=f'%{qs}%';s=s.where(or_(Model.name.ilike(t),Model.part_number.ilike(t),Model.tags.ilike(t)))
+ if qs:
+  t=f'%{qs}%';s=s.where(or_(Model.name.ilike(t),Model.part_number.ilike(t),Model.tags.ilike(t),Model.design_project.ilike(t)))
  return [output(x) for x in db.scalars(s.order_by(Model.updated_at.desc())).unique()]
 @app.get('/api/tags')
 def tags(db:Session=Depends(get_db)):
@@ -78,3 +80,21 @@ def delete(mid:int,db:Session=Depends(get_db)):
  m=db.get(Model,mid)
  if not m:raise HTTPException(404,'Model not found')
  p=settings.storage_root/'Models'/safe(m.part_number);db.delete(m);db.commit();shutil.rmtree(p,ignore_errors=True);return {'ok':True}
+
+
+
+frontend_dist = (
+    Path(__file__).resolve().parents[2]
+    / "frontend"
+    / "dist"
+)
+
+if frontend_dist.exists():
+    app.mount(
+        "/",
+        StaticFiles(
+            directory=str(frontend_dist),
+            html=True,
+        ),
+        name="frontend",
+    )
