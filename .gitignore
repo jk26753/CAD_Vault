@@ -85,3 +85,5 @@ data/
 
 # Uploaded model files and generated previews
 vault/
+# Local table configurator settings
+backend/configurator.env
