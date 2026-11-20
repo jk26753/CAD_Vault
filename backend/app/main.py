@@ -80,8 +80,9 @@ def delete(mid:int,db:Session=Depends(get_db)):
  m=db.get(Model,mid)
  if not m:raise HTTPException(404,'Model not found')
  p=settings.storage_root/'Models'/safe(m.part_number);db.delete(m);db.commit();shutil.rmtree(p,ignore_errors=True);return {'ok':True}
-
-
+ # Table Configurator: a separate tool mounted at /api/configurator (see app/configurator)
+from .configurator import router as configurator_router
+app.include_router(configurator_router)
 
 frontend_dist = (
     Path(__file__).resolve().parents[2]
