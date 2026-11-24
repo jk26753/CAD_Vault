@@ -144,6 +144,20 @@ robocopy ".\CAD_Vault_Data" "$env:USERPROFILE\Documents\CAD_Vault_Backup_$(Get-D
   active document. If SolidWorks is unavailable, the file is still saved and the page says
   SolidWorks was not updated.
 
+### Export
+
+After a successful **Apply & Rebuild**, the Export panel saves the rebuilt model and downloads it
+through the browser. Export is disabled while there are unapplied changes.
+
+- **STEP:** SolidWorks STEP export of the active assembly. The STEP version (AP203/AP214/AP242)
+  follows SolidWorks' setting in Tools > Options > Export.
+- **Pack and Go (ZIP):** SolidWorks Pack and Go of the active assembly, including drawings,
+  Toolbox and suppressed components, zipped by the backend. Every copied file gets the export
+  name as a suffix, so it never shares a file name with the master. In the copy, the link to
+  `equations.txt` is broken, so it keeps its dimensions and is independent of the master.
+- **File name:** defaults to `Table_L<length>_W<width>_H<height>_<Casters|NoCasters>_<date>`.
+  Type a custom name to override it.
+
 ## Development mode
 
 For live-reloading frontend work, run the server as usual, then in a second terminal:
