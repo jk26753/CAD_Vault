@@ -1,6 +1,6 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
 import { RotateCw } from 'lucide-react';
-import { apply, getState, type Param, type State } from './api';
+import { apply, exportModel, getState, type ExportFormat, type Param, type State } from './api';
 import TablePreview from './TablePreview';
 import './configurator.css';
 
@@ -22,6 +22,11 @@ export default function Configurator() {
   const [values, setValues] = useState<Record<string, number>>({});
   const [status, setStatus] = useState<Status>({ msg: 'Loading...', color: WARN });
   const [busy, setBusy] = useState(false);
+  // Export is allowed only when SolidWorks matches the page: after load, or after an Apply
+  // that reached SolidWorks. Any change on the page clears it until the next Apply.
+  const [exportable, setExportable] = useState(false);
+  const [format, setFormat] = useState<ExportFormat>('step');
+  const [customName, setCustomName] = useState(''); // blank = use the auto name
 
   const load = async () => {
     setStatus({ msg: 'Loading...', color: WARN });
@@ -33,6 +38,7 @@ export default function Configurator() {
         ...Object.fromEntries(s.options.map(o => [o.name, s.values[o.name]])),
       });
       setStatus({ msg: 'Ready', color: OK });
+      setExportable(true);
     } catch (e) {
       setState(undefined);
       setStatus({ msg: (e as Error).message, color: ERR });
@@ -42,6 +48,7 @@ export default function Configurator() {
 
   const change = (name: string, v: number) => {
     setValues(prev => ({ ...prev, [name]: v }));
+    setExportable(false);
     setStatus({ msg: 'Changes not applied - click Apply & Rebuild', color: WARN });
   };
 
@@ -52,6 +59,24 @@ export default function Configurator() {
     try {
       const r = await apply(vals);
       setStatus({ msg: r.message, color: r.synced ? OK : ERR });
+      setExportable(r.synced);
+    } catch (e) {
+      setStatus({ msg: (e as Error).message, color: ERR });
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const runExport = async (name: string) => {
+    if (busy || !exportable) return;
+    setBusy(true);
+    setStatus({
+      msg: format === 'step' ? 'Exporting STEP...' : 'Running Pack and Go (this can take a minute)...',
+      color: WARN,
+    });
+    try {
+      const file = await exportModel(format, name);
+      setStatus({ msg: `Exported ${file}`, color: OK });
     } catch (e) {
       setStatus({ msg: (e as Error).message, color: ERR });
     } finally {
@@ -95,6 +120,10 @@ export default function Configurator() {
   }
 
   const L = values.TableLength, W = values.TableWidth, H = values.TableHeight;
+  // Default export name, e.g. Table_L56.5_W48_H44.5_Casters_2026-11-24 (local date).
+  const casters = values.Casters === state.options.find(o => o.name === 'Casters')?.on;
+  const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
+  const autoName = `Table_L${fmt(L)}_W${fmt(W)}_H${fmt(H)}_${casters ? 'Casters' : 'NoCasters'}_${today}`;
   const derived = [
     ['CENTER EXTR.', (W - 3) / 3],
     ['HOLE PLATES', W / 6],
@@ -144,10 +173,43 @@ export default function Configurator() {
             </label>
           ))}
         </section>
-        <section className="cfgPanel">
-          <h2>PREVIEW</h2>
-          <TablePreview L={L} W={W} H={H} />
-        </section>
+        <div className="cfgSide">
+          <section className="cfgPanel cfgPreviewPanel">
+            <h2>PREVIEW</h2>
+            <TablePreview L={L} W={W} H={H} />
+          </section>
+          <section className="cfgPanel cfgExport">
+        <h2>EXPORT</h2>
+        <div className="cfgExportRow">
+          <div className="cfgFormat" role="radiogroup" aria-label="Export format">
+            {([['step', 'STEP'], ['packandgo', 'PACK AND GO (ZIP)']] as const).map(([f, label]) => (
+              <label key={f} className={format === f ? 'on' : ''}>
+                <input type="radio" name="cfgFormat" checked={format === f} onChange={() => setFormat(f)} />
+                {label}
+              </label>
+            ))}
+          </div>
+          <input
+            className="cfgName" type="text" aria-label="File name"
+            value={customName} placeholder={autoName}
+            onChange={e => setCustomName(e.target.value)}
+            onKeyDown={e => e.stopPropagation()} // Enter here must not trigger Apply & Rebuild
+          />
+          <span className="cfgMuted">.{format === 'step' ? 'step' : 'zip'}</span>
+          <button
+            className="cfgApply" disabled={busy || !exportable}
+            onClick={() => void runExport(customName.trim() || autoName)}
+          >
+            EXPORT
+          </button>
+        </div>
+        <p className="cfgMuted">
+          {exportable
+            ? 'Exports the model as currently rebuilt in SolidWorks. Leave the name blank to use the default shown.'
+            : 'Apply & Rebuild first: export is available once SolidWorks matches the input values.'}
+        </p>
+          </section>
+        </div>
       </div>
       <div className="cfgFoot">
         <span style={{ color: status.color }}>{status.msg.toUpperCase()}</span>

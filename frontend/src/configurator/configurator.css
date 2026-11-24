@@ -44,6 +44,13 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   gap: clamp(14px, 1.3vw, 24px);
 }
+/* Side-by-side layout: the panels fill the window height (minus title, status and path lines). */
+@media (min-width: 801px) {
+  .cfg .cfgGrid {
+    height: calc(100vh - 290px);
+    min-height: 440px;
+  }
+}
 .cfg .cfgPanel {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -132,11 +139,86 @@
   cursor: pointer;
 }
 
+/* Right column: preview on top fills whatever height the inputs panel leaves after Export. */
+.cfg .cfgSide {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(14px, 1.3vw, 24px);
+  min-width: 0;
+}
+.cfg .cfgPreviewPanel {
+  flex: 1 1 0; /* takes no height of its own, so the inputs panel sets the row height */
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+}
 .cfg .cfgPreview {
   width: 100%;
-  max-height: calc(100vh - 400px); /* keeps the whole page within the window */
+  flex: 1;
+  min-height: 0;
   display: block;
   font: 700 9px var(--mono);
+}
+
+/* Export panel: format choice | file name | extension | button */
+.cfg .cfgExport {
+  flex: none;
+}
+/* Two rows: [format choice ......... EXPORT]
+              [file name ............ .step] */
+.cfg .cfgExportRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'fmt btn' 'name ext';
+  align-items: center;
+  gap: clamp(10px, 1vw, 16px);
+}
+.cfg .cfgExportRow > .cfgFormat { grid-area: fmt; justify-self: start; }
+.cfg .cfgExportRow > .cfgName { grid-area: name; }
+.cfg .cfgExportRow > .cfgMuted { grid-area: ext; }
+.cfg .cfgExportRow > button { grid-area: btn; }
+.cfg .cfgFormat {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.cfg .cfgFormat label {
+  padding: clamp(8px, 1.2vh, 12px) clamp(12px, 1vw, 18px);
+  font: 700 clamp(12px, 0.85vw, 15px) var(--mono);
+  color: var(--muted);
+  cursor: pointer;
+}
+.cfg .cfgFormat label.on {
+  background: var(--accent);
+  color: var(--bg);
+}
+.cfg .cfgFormat input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.cfg .cfgFormat label:has(input:focus-visible) {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+.cfg .cfgName {
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: clamp(8px, 1.1vh, 11px) 10px;
+  font: clamp(13px, 0.95vw, 17px) var(--mono);
+}
+.cfg .cfgName::placeholder {
+  color: var(--muted);
+}
+.cfg .cfgName:focus {
+  outline: 1px solid var(--accent);
+}
+.cfg .cfgExport > p {
+  margin: 10px 0 0;
 }
 
 .cfg .cfgFoot {
@@ -174,5 +256,13 @@
 @media (max-width: 800px) {
   .cfg .cfgGrid {
     grid-template-columns: 1fr;
+  }
+  /* Stacked: the preview keeps its natural proportions instead of filling leftover height. */
+  .cfg .cfgPreviewPanel {
+    flex: none;
+  }
+  .cfg .cfgPreview {
+    flex: none;
+    height: auto;
   }
 }

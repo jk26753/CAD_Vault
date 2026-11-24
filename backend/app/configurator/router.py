@@ -1,7 +1,15 @@
 """API for the Table Configurator. Independent of Model Vault's database and files."""
-from fastapi import APIRouter, HTTPException
+import shutil
+import tempfile
+from pathlib import Path
+from typing import Literal
 
-from . import equations, solidworks
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import FileResponse
+from pydantic import BaseModel
+from starlette.background import BackgroundTask
+
+from . import equations, export, solidworks
 from .settings import OPTIONS, PARAMS, settings
 
 router = APIRouter(prefix="/api/configurator", tags=["configurator"])
@@ -63,3 +71,34 @@ def apply(values: dict[str, float]):
     except Exception as e:
         return {"saved": True, "synced": False, "message": f"File saved, SolidWorks not updated: {e}"}
     return {"saved": True, "synced": True, "message": f"Synced: {title}"}
+
+
+class ExportRequest(BaseModel):
+    format: Literal["step", "packandgo"]
+    name: str  # file name without extension; the page fills in the auto name by default
+
+
+@router.post("/export")
+def export_model(req: ExportRequest):
+    """Export the active (already rebuilt) SolidWorks assembly and send it as a download.
+
+    Work happens in a temporary folder that is deleted after the file has been sent.
+    """
+    name = export.safe_name(req.name)
+    if not any(c.isalnum() for c in name):
+        raise HTTPException(422, "File name must contain letters or numbers")
+    work = Path(tempfile.mkdtemp(prefix="cadvault_export_"))
+    cleanup = BackgroundTask(shutil.rmtree, work, ignore_errors=True)
+    try:
+        if req.format == "step":
+            out = work / f"{name}.step"
+            export.export_step(out)
+        else:
+            pack = work / "pack"
+            pack.mkdir()
+            export.pack_and_go(pack, f"_{name}")
+            out = export.zip_folder(pack, work / name)
+    except Exception as e:
+        shutil.rmtree(work, ignore_errors=True)
+        raise HTTPException(500, f"Export failed: {e}")
+    return FileResponse(out, filename=out.name, background=cleanup)
