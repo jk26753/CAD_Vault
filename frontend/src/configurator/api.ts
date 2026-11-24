@@ -9,7 +9,8 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     r = await fetch(BASE + path, init);
   } catch {
-    throw Error('Cannot reach the backend. Is run_backend.bat running?');
+    // fetch() only rejects on a network failure: the FastAPI server is not running or not reachable.
+    throw Error('Cannot reach the CAD Vault backend (network request failed).');
   }
   const body = await r.json().catch(() => ({}));
   if (!r.ok) throw Error(body.detail ?? `Request failed (${r.status})`);
