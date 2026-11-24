@@ -1,1 +1,34 @@
-import{useState}from'react';const OPTIONS=['UR3e','UR5e/UR7e','UR10e/UR12e','UR15','UR16e','UR20','UR30','UR8L'];export default function RobotSelect({value,setValue}:{value:string[];setValue:(x:string[])=>void}){const[o,setO]=useState(false);return <div className="robot"><button type="button" onClick={()=>setO(!o)}>{value.length?value.join(', '):'Select compatible robots'} <b>⌄</b></button>{o&&<div>{OPTIONS.map(x=><label><input type="checkbox" checked={value.includes(x)} onChange={()=>setValue(value.includes(x)?value.filter(v=>v!==x):[...value,x])}/>{x}</label>)}</div>}</div>}
+import { useState } from 'react';
+const OPTIONS = ['UR3e', 'UR5e/UR7e', 'UR10e/UR12e', 'UR15', 'UR16e', 'UR20', 'UR30', 'UR8L'];
+export default function RobotSelect({
+  value,
+  setValue,
+}: {
+  value: string[];
+  setValue: (x: string[]) => void;
+}) {
+  const [o, setO] = useState(false);
+  return (
+    <div className="robot">
+      <button type="button" onClick={() => setO(!o)}>
+        {value.length ? value.join(', ') : 'Select compatible robots'} <b>⌄</b>
+      </button>
+      {o && (
+        <div>
+          {OPTIONS.map((x) => (
+            <label>
+              <input
+                type="checkbox"
+                checked={value.includes(x)}
+                onChange={() =>
+                  setValue(value.includes(x) ? value.filter((v) => v !== x) : [...value, x])
+                }
+              />
+              {x}
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
