@@ -96,7 +96,12 @@ def export_model(req: ExportRequest):
         else:
             pack = work / "pack"
             pack.mkdir()
-            export.pack_and_go(pack, f"_{name}")
+            # Copied files get a short dimension code, e.g. TopPlate_L60.25W48H44.5.SLDPRT,
+            # from the values SolidWorks was last rebuilt with (the zip keeps the full name).
+            v = equations.read_values(settings.equations_file, ["TableLength", "TableWidth", "TableHeight"])
+            n = equations._number
+            suffix = f"_L{n(v['TableLength'])}W{n(v['TableWidth'])}H{n(v['TableHeight'])}"
+            export.pack_and_go(pack, suffix)
             out = export.zip_folder(pack, work / name)
     except Exception as e:
         shutil.rmtree(work, ignore_errors=True)

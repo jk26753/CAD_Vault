@@ -152,8 +152,9 @@ through the browser. Export is disabled while there are unapplied changes.
 - **STEP:** SolidWorks STEP export of the active assembly. The STEP version (AP203/AP214/AP242)
   follows SolidWorks' setting in Tools > Options > Export.
 - **Pack and Go (ZIP):** SolidWorks Pack and Go of the active assembly, including drawings,
-  Toolbox and suppressed components, zipped by the backend. Every copied file gets the export
-  name as a suffix, so it never shares a file name with the master. In the copy, the link to
+  Toolbox and suppressed components, zipped by the backend. Every copied file gets a short
+  dimension code as a suffix (e.g. `TopPlate_L60.25W48H44.5.SLDPRT`), so it never shares a file
+  name with the master; the zip itself gets the export name. In the copy, the link to
   `equations.txt` is broken, so it keeps its dimensions and is independent of the master.
 - **File name:** defaults to `Table_L<length>_W<width>_H<height>_<Casters|NoCasters>_<date>`.
   Type a custom name to override it.
