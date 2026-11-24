@@ -7,8 +7,14 @@ import './configurator.css';
 const OK = '#2ee6a6', WARN = '#ffb020', ERR = '#ff5470';
 type Status = { msg: string; color: string };
 
-const snap = (v: number, p: Param) =>
-  Math.min(p.max, Math.max(p.min, Math.round(v / p.step) * p.step));
+// Decimal places in a step: 0.01 -> 2, 6 -> 0.
+const decimals = (step: number) => (String(step).split('.')[1] ?? '').length;
+// Clamp to the range and round to the nearest step. toFixed removes floating-point
+// noise such as 80.13000000000001 so the value shown and sent is exactly 80.13.
+const snap = (v: number, p: Param) => {
+  const stepped = Math.min(p.max, Math.max(p.min, Math.round(v / p.step) * p.step));
+  return Number(stepped.toFixed(decimals(p.step)));
+};
 const fmt = (n: number) => String(Number(n.toFixed(4))); // like Python's {:g}
 
 export default function Configurator() {

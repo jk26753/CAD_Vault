@@ -37,10 +37,15 @@ def read_values(path: Path, names: list[str]) -> dict[str, float]:
     return out
 
 
-def write_values(path: Path, values: dict[str, int]) -> None:
+def _number(v: float) -> str:
+    """Format for equations.txt: 80.0 -> "80" (as before), 80.25 -> "80.25"."""
+    return format(v, ".10g")
+
+
+def write_values(path: Path, values: dict[str, float]) -> None:
     text, enc = _load(path)
     for name, v in values.items():
-        text, n = re.subn(_pattern(name), rf"\g<1>{v}", text, count=1, flags=re.M)
+        text, n = re.subn(_pattern(name), rf"\g<1>{_number(v)}", text, count=1, flags=re.M)
         if n != 1:
             raise ValueError(f'Could not update "{name}"')
     path.write_bytes(text.encode(enc))

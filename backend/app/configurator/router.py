@@ -25,16 +25,28 @@ def state():
     }
 
 
+def _decimals(step: float) -> int:
+    """Number of decimal places in a step, e.g. 0.01 -> 2, 6 -> 0."""
+    s = repr(float(step))
+    return 0 if s.endswith(".0") else len(s.split(".")[1])
+
+
 @router.post("/apply")
-def apply(values: dict[str, int]):
+def apply(values: dict[str, float]):
+    clean = {}
     for name, _label, lo, hi, step in PARAMS:
         v = values.get(name)
         if v is None:
             raise HTTPException(422, f"Missing value for {name}")
-        if not lo <= v <= hi or v % step:
+        # Count whole steps with a small tolerance: decimal values such as 80.13 are
+        # not exact in floating point, so `v % step` would give false rejections.
+        n = round(v / step)
+        if not lo <= v <= hi or abs(v / step - n) > 1e-6:
             raise HTTPException(422, f"{name} must be {lo}-{hi} in steps of {step}")
+        # Store the exact multiple of the step, rounded to the step's decimal places.
+        clean[name] = round(n * step, _decimals(step))
     try:
-        equations.write_values(settings.equations_file, {n: values[n] for n in NAMES})
+        equations.write_values(settings.equations_file, clean)
     except Exception as e:
         raise HTTPException(500, f"File error: {e}")
     try:

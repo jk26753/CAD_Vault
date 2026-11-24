@@ -58,7 +58,7 @@
 
 .cfg .cfgRow {
   display: grid;
-  grid-template-columns: 70px 1fr 74px 18px;
+  grid-template-columns: 70px 1fr 96px 18px; /* number box fits 119.99 */
   align-items: center;
   gap: 12px;
   padding: 10px 0;
