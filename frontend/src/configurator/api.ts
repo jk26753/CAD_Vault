@@ -1,6 +1,9 @@
 // Table Configurator API. Separate from Model Vault's api.ts on purpose.
 const BASE = '/api/configurator';
-export type Param = { name: string; label: string; min: number; max: number; step: number };
+// step: smallest allowed (typed) increment. slider_step: increment the slider moves in.
+export type Param = {
+  name: string; label: string; min: number; max: number; step: number; slider_step: number;
+};
 export type State = { equations_file: string; params: Param[]; values: Record<string, number> };
 export type ApplyResult = { saved: boolean; synced: boolean; message: string };
 

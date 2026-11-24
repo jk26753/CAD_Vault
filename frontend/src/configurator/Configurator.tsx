@@ -109,7 +109,7 @@ export default function Configurator() {
             <div className="cfgRow" key={p.name}>
               <label htmlFor={`cfg-${p.name}`}>{p.label}</label>
               <input
-                type="range" min={p.min} max={p.max} step={p.step}
+                type="range" min={p.min} max={p.max} step={p.slider_step}
                 value={values[p.name]}
                 onChange={e => change(p.name, Number(e.target.value))}
               />

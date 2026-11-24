@@ -19,8 +19,8 @@ def state():
         raise HTTPException(422, str(e))
     return {
         "equations_file": str(path),
-        "params": [{"name": n, "label": lb, "min": lo, "max": hi, "step": st}
-                   for n, lb, lo, hi, st in PARAMS],
+        "params": [{"name": n, "label": lb, "min": lo, "max": hi, "step": st, "slider_step": sl}
+                   for n, lb, lo, hi, st, sl in PARAMS],
         "values": values,
     }
 
@@ -34,7 +34,7 @@ def _decimals(step: float) -> int:
 @router.post("/apply")
 def apply(values: dict[str, float]):
     clean = {}
-    for name, _label, lo, hi, step in PARAMS:
+    for name, _label, lo, hi, step, _slider in PARAMS:
         v = values.get(name)
         if v is None:
             raise HTTPException(422, f"Missing value for {name}")

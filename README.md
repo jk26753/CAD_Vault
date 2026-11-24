@@ -133,11 +133,11 @@ robocopy ".\CAD_Vault_Data" "$env:USERPROFILE\Documents\CAD_Vault_Backup_$(Get-D
   `equations.txt`. Derived equations, file encoding and line endings are preserved.
 - Current limits (prototype values, set in `backend/app/configurator/settings.py`):
 
-  | Parameter | Min | Max | Step |
-  |---|---|---|---|
-  | TableLength | 24 in (609.6 mm) | 120 in (3048 mm) | 0.01 in (0.254 mm) |
-  | TableWidth | 24 in (609.6 mm) | 96 in (2438.4 mm) | 6 in (152.4 mm) |
-  | TableHeight | 24 in (609.6 mm) | 96 in (2438.4 mm) | 1 in (25.4 mm) |
+  | Parameter | Min | Max | Typed step | Slider step |
+  |---|---|---|---|---|
+  | TableLength | 24 in (609.6 mm) | 120 in (3048 mm) | 0.01 in (0.254 mm) | 0.5 in (12.7 mm) |
+  | TableWidth | 24 in (609.6 mm) | 96 in (2438.4 mm) | 6 in (152.4 mm) | 6 in (152.4 mm) |
+  | TableHeight | 24 in (609.6 mm) | 96 in (2438.4 mm) | 0.01 in (0.254 mm) | 0.5 in (12.7 mm) |
 
 - **Apply & Rebuild** saves the file, then asks the running SolidWorks session to reload the
   equations and rebuild. SolidWorks must be running on the same PC with the table assembly as the
