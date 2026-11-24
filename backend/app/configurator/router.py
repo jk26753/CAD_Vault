@@ -1,4 +1,5 @@
 """API for the Table Configurator. Independent of Model Vault's database and files."""
+import logging
 import shutil
 import tempfile
 from pathlib import Path
@@ -12,6 +13,7 @@ from starlette.background import BackgroundTask
 from . import equations, export, export_ids, solidworks
 from .settings import OPTIONS, PARAMS, settings
 
+log = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/configurator", tags=["configurator"])
 NAMES = [p[0] for p in PARAMS] + [o[0] for o in OPTIONS]
 
@@ -113,7 +115,11 @@ def export_model(req: ExportRequest):
                 )
                 export.pack_and_go(pack, suffix)
                 out = export.zip_folder(pack, work / name)
+    except export.StepError as e:  # already labelled with the step, e.g. 'at "running Pack and Go": ...'
+        shutil.rmtree(work, ignore_errors=True)
+        raise HTTPException(500, f"Export failed {e}")
     except Exception as e:
+        log.exception("Export failed")  # full details in the server window
         shutil.rmtree(work, ignore_errors=True)
         raise HTTPException(500, f"Export failed: {e}")
     return FileResponse(out, filename=out.name, background=cleanup)
