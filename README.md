@@ -153,11 +153,15 @@ through the browser. Export is disabled while there are unapplied changes.
   follows SolidWorks' setting in Tools > Options > Export.
 - **Pack and Go (ZIP):** SolidWorks Pack and Go of the active assembly, including drawings,
   Toolbox and suppressed components, zipped by the backend. Every copied file gets a short
-  dimension code as a suffix (e.g. `TopPlate_L60.25W48H44.5.SLDPRT`), so it never shares a file
-  name with the master; the zip itself gets the export name. In the copy, the link to
+  dimension code and the export ID as a suffix (e.g. `TopPlate_L60.25W48H44.5_IPT002.SLDPRT`), so
+  it never shares a file name with the master or another export; the zip gets the export name. In the copy, the link to
   `equations.txt` is broken, so it keeps its dimensions and is independent of the master.
 - **File name:** defaults to `Table_L<length>_W<width>_H<height>_<Casters|NoCasters>_<date>`.
-  Type a custom name to override it.
+  Type a custom name to override it. Either way the export ID is added, e.g. `..._IPT002.zip`.
+- **Export ID:** every successful export gets the next number (`IPT001`, `IPT002`, ...; STEP and
+  Pack and Go share one sequence). A failed export does not use a number. The last number used is
+  stored in `<vault folder>\Configurator\export_counter.txt` (inside the data folder, so back it up
+  with the data); set `CONFIGURATOR_EXPORT_COUNTER_FILE` in `configurator.env` to move it.
 
 ## Development mode
 

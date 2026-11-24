@@ -10,6 +10,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class ConfiguratorSettings(BaseSettings):
     equations_file: Path = Path(r"C:\TSLOTSProjects\testParametric\equations.txt")
+    # Export ID counter (see export_ids.py). Blank = inside the Model Vault data folder.
+    export_counter_file: Path | None = None
 
     model_config = SettingsConfigDict(env_file="configurator.env", env_prefix="CONFIGURATOR_", extra="ignore")
 

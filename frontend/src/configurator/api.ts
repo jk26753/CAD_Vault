@@ -8,6 +8,7 @@ export type Param = {
 export type Option = { name: string; label: string; on: number; off: number };
 export type State = {
   equations_file: string; params: Param[]; options: Option[]; values: Record<string, number>;
+  next_export_id: string | null; // e.g. IPT002; null if the counter file is unreadable
 };
 export type ApplyResult = { saved: boolean; synced: boolean; message: string };
 
@@ -25,6 +26,9 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const getState = () => call<State>('/state');
+
+export const getNextExportId = () =>
+  call<{ next_export_id: string | null }>('/export/next-id').then(r => r.next_export_id ?? '?');
 
 export const apply = (values: Record<string, number>) =>
   call<ApplyResult>('/apply', {

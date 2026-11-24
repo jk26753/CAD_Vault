@@ -1,6 +1,8 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
 import { RotateCw } from 'lucide-react';
-import { apply, exportModel, getState, type ExportFormat, type Param, type State } from './api';
+import {
+  apply, exportModel, getNextExportId, getState, type ExportFormat, type Param, type State,
+} from './api';
 import TablePreview from './TablePreview';
 import './configurator.css';
 
@@ -27,6 +29,7 @@ export default function Configurator() {
   const [exportable, setExportable] = useState(false);
   const [format, setFormat] = useState<ExportFormat>('step');
   const [customName, setCustomName] = useState(''); // blank = use the auto name
+  const [nextId, setNextId] = useState(''); // e.g. IPT002, added to every export name by the server
 
   const load = async () => {
     setStatus({ msg: 'Loading...', color: WARN });
@@ -39,6 +42,7 @@ export default function Configurator() {
       });
       setStatus({ msg: 'Ready', color: OK });
       setExportable(true);
+      setNextId(s.next_export_id ?? '?');
     } catch (e) {
       setState(undefined);
       setStatus({ msg: (e as Error).message, color: ERR });
@@ -81,6 +85,7 @@ export default function Configurator() {
       setStatus({ msg: (e as Error).message, color: ERR });
     } finally {
       setBusy(false);
+      getNextExportId().then(setNextId, () => {}); // a failed export does not use up a number
     }
   };
 
@@ -195,7 +200,7 @@ export default function Configurator() {
             onChange={e => setCustomName(e.target.value)}
             onKeyDown={e => e.stopPropagation()} // Enter here must not trigger Apply & Rebuild
           />
-          <span className="cfgMuted">.{format === 'step' ? 'step' : 'zip'}</span>
+          <span className="cfgMuted">_{nextId}.{format === 'step' ? 'step' : 'zip'}</span>
           <button
             className="cfgApply" disabled={busy || !exportable}
             onClick={() => void runExport(customName.trim() || autoName)}
@@ -205,7 +210,7 @@ export default function Configurator() {
         </div>
         <p className="cfgMuted">
           {exportable
-            ? 'Exports the model as currently rebuilt in SolidWorks. Leave the name blank to use the default shown.'
+            ? 'Exports the model as currently rebuilt in SolidWorks. Leave the name blank to use the default shown. Every export gets the next ID number.'
             : 'Apply & Rebuild first: export is available once SolidWorks matches the input values.'}
         </p>
           </section>
