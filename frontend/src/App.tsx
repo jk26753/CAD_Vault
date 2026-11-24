@@ -31,7 +31,14 @@ const cc = (x: string) =>
   ['mount', 'eoat', 'print', 'tslot', 'fixture', 'ref', 'sheet', 'misc'][
     Math.max(0, CAT.indexOf(x))
   ];
-export default function App() {
+// Local date from the backend's UTC timestamp (stored without a zone).
+const createdDate = (iso: string) => new Date(iso + 'Z').toLocaleDateString();
+
+// The Model Vault page. With collection="table_config" the same page shows Table Configurations
+// (tables saved from the Table Configurator export): fewer fields, no Add model, and only the
+// name and description are editable.
+export default function App({ collection = 'vault' }: { collection?: 'vault' | 'table_config' }) {
+  const isCfg = collection === 'table_config';
   const [ms, setMs] = useState<M[]>([]),
     [id, setId] = useState<number>(),
     [grid, setGrid] = useState(true),
@@ -42,8 +49,8 @@ export default function App() {
     [tags, setTags] = useState<string[]>([]);
   const load = async () => {
     const [a, t] = await Promise.all([
-      req<M[]>(`/models?qs=${encodeURIComponent(query)}`),
-      req<string[]>('/tags'),
+      req<M[]>(`/models?qs=${encodeURIComponent(query)}&collection=${collection}`),
+      isCfg ? Promise.resolve([]) : req<string[]>('/tags'),
     ]);
     setMs(a);
     setTags(t);
@@ -52,13 +59,15 @@ export default function App() {
   useEffect(() => {
     void load();
   }, [query]);
-  const items = [...ms].sort((a, b) =>
-      sort === 'category'
-        ? a.category.localeCompare(b.category)
-        : sort === 'price'
-          ? (parseFloat(b.rom_price) || 0) - (parseFloat(a.rom_price) || 0)
-          : (b.last_quoted_on || '').localeCompare(a.last_quoted_on || ''),
-    ),
+  const items = isCfg
+      ? ms // already newest first from the server
+      : [...ms].sort((a, b) =>
+          sort === 'category'
+            ? a.category.localeCompare(b.category)
+            : sort === 'price'
+              ? (parseFloat(b.rom_price) || 0) - (parseFloat(a.rom_price) || 0)
+              : (b.last_quoted_on || '').localeCompare(a.last_quoted_on || ''),
+        ),
     m = ms.find((x) => x.id === id);
   return (
     <>
@@ -68,10 +77,12 @@ export default function App() {
             {grid ? <List /> : <Grid3X3 />}
             <span>{grid ? 'Detail view' : 'Grid view'}</span>
           </button>
-          <button className="primary" onClick={() => setForm(true)}>
-            <Plus />
-            <span>Add model</span>
-          </button>
+          {!isCfg && (
+            <button className="primary" onClick={() => setForm(true)}>
+              <Plus />
+              <span>Add model</span>
+            </button>
+          )}
         </nav>
       </HeaderActions>
       <main>
@@ -80,9 +91,13 @@ export default function App() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search names, part numbers, tags, and design projects"
+            placeholder={
+              isCfg
+                ? 'Search names and part numbers'
+                : 'Search names, part numbers, tags, and design projects'
+            }
           />
-          {grid && (
+          {grid && !isCfg && (
             <>
               <label>Sort By</label>
               <select value={sort} onChange={(e) => setSort(e.target.value)}>
@@ -101,7 +116,7 @@ export default function App() {
               );
               return (
                 <article
-                  className={cc(x.category)}
+                  className={isCfg ? 'mount' : cc(x.category)}
                   onClick={() => {
                     setId(x.id);
                     setGrid(false);
@@ -113,11 +128,27 @@ export default function App() {
                   <div className="body">
                     <small>{x.part_number}</small>
                     <h2>{x.name}</h2>
-                    <p>{x.category}</p>
-                    <footer>
-                      <span>{x.rom_price ? `$${x.rom_price.replace(/^\$/, '')}` : 'No price'}</span>
-                      <span>{x.last_quoted_on || 'No quote date'}</span>
-                    </footer>
+                    {isCfg ? (
+                      <>
+                        <p>
+                          {x.dimension_length} &times; {x.dimension_width} &times;{' '}
+                          {x.dimension_height} {x.dimension_unit}
+                        </p>
+                        <footer>
+                          <span>Created {createdDate(x.created_at)}</span>
+                        </footer>
+                      </>
+                    ) : (
+                      <>
+                        <p>{x.category}</p>
+                        <footer>
+                          <span>
+                            {x.rom_price ? `$${x.rom_price.replace(/^\$/, '')}` : 'No price'}
+                          </span>
+                          <span>{x.last_quoted_on || 'No quote date'}</span>
+                        </footer>
+                      </>
+                    )}
                   </div>
                   <div className="strip" />
                 </article>
@@ -127,7 +158,7 @@ export default function App() {
         ) : m ? (
           <div className="detailLayout">
             <aside className="modelSidebar">
-              <div className="sidebarHeading">Models</div>
+              <div className="sidebarHeading">{isCfg ? 'Configurations' : 'Models'}</div>
               {ms.map((x) => (
                 <button
                   key={x.id}
@@ -141,6 +172,7 @@ export default function App() {
             </aside>
             <Detail
               m={m}
+              isCfg={isCfg}
               edit={() => setForm(true)}
               confirmDelete={() => setDel(true)}
               reload={load}
@@ -148,7 +180,8 @@ export default function App() {
           </div>
         ) : null}
       </main>
-      {form && (
+      {form && isCfg && m && <ConfigForm model={m} close={() => setForm(false)} done={load} />}
+      {form && !isCfg && (
         <Form
           model={m && !grid ? m : undefined}
           suggestions={tags}
@@ -173,11 +206,13 @@ export default function App() {
 }
 function Detail({
   m,
+  isCfg,
   edit,
   confirmDelete,
   reload,
 }: {
   m: M;
+  isCfg: boolean;
   edit: () => void;
   confirmDelete: () => void;
   reload: () => Promise<void>;
@@ -205,42 +240,58 @@ function Detail({
       <div className="detailGrid">
         <Viewer modelId={m.id} files={m.files} reload={reload} />
         <div className="panel">
-          <dl>
-            <dt>Design Project</dt>
-            <dd>{m.design_project || '\u2014'}</dd>
-            <dt>Category</dt>
-            <dd>{m.category}</dd>
-            <dt>Compatible robots</dt>
-            <dd>{m.compatible_robots || '\u2014'}</dd>
-            <dt>Dimensions</dt>
-            <dd>
-              {m.dimension_length || '\u2014'} &times; {m.dimension_width || '\u2014'} &times;{' '}
-              {m.dimension_height || '\u2014'} {m.dimension_unit}
-            </dd>
-            <dt>ROM Price</dt>
-            <dd>{m.rom_price ? `$${m.rom_price.replace(/^\$/, '')}` : '\u2014'}</dd>
-            <dt>Last Quoted On</dt>
-            <dd>{m.last_quoted_on || '\u2014'}</dd>
-            <dt>Tags</dt>
-            <dd className="bubbles">
-              {m.tags
-                .split(',')
-                .map((x) => x.trim())
-                .filter(Boolean)
-                .map((t) => (
-                  <span>{t}</span>
-                ))}
-            </dd>
-          </dl>
+          {isCfg ? (
+            <dl>
+              <dt>Dimensions</dt>
+              <dd>
+                {m.dimension_length} &times; {m.dimension_width} &times; {m.dimension_height}{' '}
+                {m.dimension_unit}
+              </dd>
+              <dt>Created</dt>
+              <dd>{createdDate(m.created_at)}</dd>
+              <dt>Description</dt>
+              <dd>{m.description || '\u2014'}</dd>
+            </dl>
+          ) : (
+            <dl>
+              <dt>Design Project</dt>
+              <dd>{m.design_project || '\u2014'}</dd>
+              <dt>Category</dt>
+              <dd>{m.category}</dd>
+              <dt>Compatible robots</dt>
+              <dd>{m.compatible_robots || '\u2014'}</dd>
+              <dt>Dimensions</dt>
+              <dd>
+                {m.dimension_length || '\u2014'} &times; {m.dimension_width || '\u2014'} &times;{' '}
+                {m.dimension_height || '\u2014'} {m.dimension_unit}
+              </dd>
+              <dt>ROM Price</dt>
+              <dd>{m.rom_price ? `$${m.rom_price.replace(/^\$/, '')}` : '\u2014'}</dd>
+              <dt>Last Quoted On</dt>
+              <dd>{m.last_quoted_on || '\u2014'}</dd>
+              <dt>Tags</dt>
+              <dd className="bubbles">
+                {m.tags
+                  .split(',')
+                  .map((x) => x.trim())
+                  .filter(Boolean)
+                  .map((t) => (
+                    <span>{t}</span>
+                  ))}
+              </dd>
+            </dl>
+          )}
         </div>
       </div>
       <div className="tabs">
         <button onClick={() => setTab('files')} className={tab === 'files' ? 'on' : ''}>
           Files
         </button>
-        <button onClick={() => setTab('prices')} className={tab === 'prices' ? 'on' : ''}>
-          Pricing History
-        </button>
+        {!isCfg && (
+          <button onClick={() => setTab('prices')} className={tab === 'prices' ? 'on' : ''}>
+            Pricing History
+          </button>
+        )}
       </div>
       {tab === 'files' ? (
         <div className="rows">
@@ -470,6 +521,57 @@ function UploadBox({
       <input type="file" accept={accept} onChange={(e) => change(e.target.files?.[0])} />
       <small>Optional</small>
     </label>
+  );
+}
+// Table Configurations: only the name and description can be edited (the other fields describe
+// the exported STEP file; the backend enforces this too).
+function ConfigForm({
+  model,
+  close,
+  done,
+}: {
+  model: M;
+  close: () => void;
+  done: () => Promise<void>;
+}) {
+  return (
+    <div className="modal">
+      <form
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const f = new FormData(e.currentTarget);
+          await req(`/models/${model.id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              ...model,
+              name: f.get('name'),
+              description: f.get('description'),
+            }),
+          });
+          close();
+          await done();
+        }}
+      >
+        <h2>Edit configuration</h2>
+        <div className="g">
+          <label className="wide">
+            Name
+            <input name="name" defaultValue={model.name} required />
+          </label>
+          <label className="wide">
+            Description
+            <textarea name="description" defaultValue={model.description} />
+          </label>
+        </div>
+        <footer>
+          <button type="button" onClick={close}>
+            Cancel
+          </button>
+          <button className="primary">Save</button>
+        </footer>
+      </form>
+    </div>
   );
 }
 function Confirm({ name, close, yes }: { name: string; close: () => void; yes: () => void }) {

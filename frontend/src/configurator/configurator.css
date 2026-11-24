@@ -164,13 +164,19 @@
 .cfg .cfgExport {
   flex: none;
 }
-/* One row: [file name ............ _IPT###.step] [EXPORT] */
+/* Two rows: [file name ................... _IPT###.step]
+              [x] Save to Table Configurations   [EXPORT] */
 .cfg .cfgExportRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: 'name ext' 'save btn';
   align-items: center;
   gap: clamp(10px, 1vw, 16px);
 }
+.cfg .cfgExportRow > .cfgName { grid-area: name; }
+.cfg .cfgExportRow > .cfgMuted { grid-area: ext; }
+.cfg .cfgExportRow > .cfgSave { grid-area: save; margin-top: 0; }
+.cfg .cfgExportRow > button { grid-area: btn; }
 .cfg .cfgName {
   width: 100%;
   background: var(--bg);

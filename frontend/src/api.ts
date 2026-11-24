@@ -18,6 +18,9 @@ export type M = {
   last_quoted_on: string;
   files: F[];
   pricing_history: P[];
+  collection: 'vault' | 'table_config'; // which page the model belongs to
+  table_config: string; // Table Configurations only: the Configurator inputs as JSON
+  created_at: string; // UTC, ISO format without a zone
 };
 export async function req<T>(p: string, o?: RequestInit): Promise<T> {
   const r = await fetch(API + p, o);

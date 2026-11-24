@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
-import { Box, SlidersHorizontal } from 'lucide-react';
+import { Box, SlidersHorizontal, Table2 } from 'lucide-react';
 import ModelVault from '../App';
 import Configurator from '../configurator/Configurator';
 import { HeaderSlot } from './HeaderActions';
 import './shell.css';
 
+// Table Configurations: the Model Vault page showing only tables saved from the Configurator.
+const TableConfigurations = () => <ModelVault collection="table_config" />;
+
 // Each tool is a self-contained page. Add a new tool by adding an entry here.
 const TOOLS = [
   { path: 'vault', label: 'Model Vault', icon: Box, Page: ModelVault },
   { path: 'configurator', label: 'Table Configurator', icon: SlidersHorizontal, Page: Configurator },
+  { path: 'configurations', label: 'Table Configurations', icon: Table2, Page: TableConfigurations },
 ];
 
 const current = () => {

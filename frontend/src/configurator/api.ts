@@ -37,15 +37,21 @@ export const apply = (values: Record<string, number>) =>
     body: JSON.stringify(values),
   });
 
+export type ExportResult = {
+  file: string; // downloaded file name
+  saved: string | null; // part number of the new Table Configurations entry, if saved
+  saveError: string | null; // why saving to Table Configurations failed (the download still worked)
+};
+
 // Ask the backend to export the rebuilt SolidWorks model, then save it via the browser's download.
-// Returns the downloaded file name.
-export async function exportModel(name: string): Promise<string> {
+// With saveToVault, the backend also adds an entry on the Table Configurations page.
+export async function exportModel(name: string, saveToVault: boolean): Promise<ExportResult> {
   let r: Response;
   try {
     r = await fetch(BASE + '/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ format: 'step', name }),
+      body: JSON.stringify({ format: 'step', name, save_to_vault: saveToVault }),
     });
   } catch {
     throw Error('Cannot reach the CAD Vault backend (network request failed).');
@@ -64,5 +70,9 @@ export async function exportModel(name: string): Promise<string> {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  return file;
+  return {
+    file,
+    saved: r.headers.get('X-CADVault-Saved'),
+    saveError: r.headers.get('X-CADVault-Save-Error'),
+  };
 }

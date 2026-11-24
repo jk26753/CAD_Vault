@@ -29,6 +29,7 @@ export default function Configurator() {
   const [exportable, setExportable] = useState(false);
   const [customName, setCustomName] = useState(''); // blank = use the auto name
   const [nextId, setNextId] = useState(''); // e.g. IPT002, added to every export name by the server
+  const [saveToVault, setSaveToVault] = useState(false); // unticked each time the page loads
 
   const load = async () => {
     setStatus({ msg: 'Loading...', color: WARN });
@@ -75,8 +76,17 @@ export default function Configurator() {
     setBusy(true);
     setStatus({ msg: 'Exporting STEP...', color: WARN });
     try {
-      const file = await exportModel(name);
-      setStatus({ msg: `Exported ${file}`, color: OK });
+      const r = await exportModel(name, saveToVault);
+      if (r.saveError) {
+        setStatus({
+          msg: `Exported ${r.file}, but NOT saved to Table Configurations: ${r.saveError}`,
+          color: ERR,
+        });
+      } else if (r.saved) {
+        setStatus({ msg: `Exported ${r.file} and saved to Table Configurations`, color: OK });
+      } else {
+        setStatus({ msg: `Exported ${r.file}`, color: OK });
+      }
     } catch (e) {
       setStatus({ msg: (e as Error).message, color: ERR });
     } finally {
@@ -189,6 +199,15 @@ export default function Configurator() {
             onKeyDown={e => e.stopPropagation()} // Enter here must not trigger Apply & Rebuild
           />
           <span className="cfgMuted">_{nextId}.step</span>
+          <label className="cfgCheck cfgSave">
+            <input
+              type="checkbox"
+              checked={saveToVault}
+              onChange={e => setSaveToVault(e.target.checked)}
+              onKeyDown={e => e.stopPropagation()} // Enter here must not trigger Apply & Rebuild
+            />
+            Save to Table Configurations
+          </label>
           <button
             className="cfgApply" disabled={busy || !exportable}
             onClick={() => void runExport(customName.trim() || autoName)}
