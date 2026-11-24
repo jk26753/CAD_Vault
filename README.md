@@ -3,14 +3,16 @@
 Internal engineering app for storing, browsing, previewing and configuring mechanical CAD designs.
 It runs locally on one Windows PC and opens in the browser.
 
-It contains two tools, shown as tabs at the top of the page:
+It contains three tools, shown as tabs at the top of the page:
 
 - **Model Vault** (`#/vault`): a searchable library of CAD models with categories, tags,
   Design Project, compatible robots, dimensions, ROM price and pricing history, attached files
   (STEP source, Pack and Go ZIP, drawings, BOMs, documents) and an in-browser 3D STEP viewer.
 - **Table Configurator** (`#/configurator`): sets `TableLength`, `TableWidth` and `TableHeight`
   in a SolidWorks `equations.txt` file and rebuilds the open SolidWorks assembly when you click
-  **Apply & Rebuild**. It shares no data with the Model Vault.
+  **Apply & Rebuild**, and exports the rebuilt table as a STEP file.
+- **Table Configurations** (`#/configurations`): tables saved from the Configurator's export,
+  in the same layout as the Model Vault but kept separate from it.
 
 ## How it runs
 
@@ -158,8 +160,35 @@ while there are unapplied changes.
   export does not use a number. The last number used is stored in
   `<vault folder>\Configurator\export_counter.txt` (inside the data folder, so back it up with
   the data); set `CONFIGURATOR_EXPORT_COUNTER_FILE` in `configurator.env` to move it.
+- **Save to Table Configurations:** tick the box next to Export (unticked by default) to also
+  add the table to the Table Configurations page. The download happens either way; if saving
+  fails, the status line says so and why.
 - Pack and Go export was tried and removed: SolidWorks 2022's late-bound `GetPackAndGo` does not
   work from pywin32 (see git history). A comtypes-based approach is the likely route if revisited.
+
+## Table Configurations
+
+Configured tables are stored with the Model Vault's database and files, marked
+`collection = table_config` (Model Vault models are `vault`), so they never appear in the Model
+Vault itself.
+
+- Each entry: part number = export ID (e.g. `IPT002`), name = export name, dimensions (in),
+  created date, description, and the STEP file under `vault\Models\<IPT###>\Source`. The
+  Configurator inputs are also stored (hidden) for future use.
+- Only the name and description can be edited. Deleting an entry removes its stored files.
+- The 3D preview and thumbnail are generated the first time an entry is opened, as for Model
+  Vault models.
+
+## Testing changes on a copy of the data
+
+`start-test-vault.bat` runs CAD Vault on **port 8001** against **`CAD_Vault_Test_Data`**, a copy
+of `CAD_Vault_Data` made the first time it runs. The live app (port 8000) and live data are not
+touched, and both can run at the same time. Delete `CAD_Vault_Test_Data` to start again from a
+fresh copy.
+
+- The Table Configurator still drives the real SolidWorks session and `equations.txt`; don't use
+  the Configurator in both apps at once.
+- The test copy has its own export counter, so test exports do not use up live export IDs.
 
 ## Development mode
 
@@ -196,6 +225,7 @@ frontend/
   src/configurator/      Table Configurator page
   vite.config.ts         dev-server proxy (no effect on the build)
 start-model-vault.bat    normal launcher
+start-test-vault.bat     test launcher: port 8001, copy of the data
 run_backend.bat          older launcher (see below)
 run_frontend.bat         starts the Vite dev server
 ```
