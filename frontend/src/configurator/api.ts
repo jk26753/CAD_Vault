@@ -37,17 +37,15 @@ export const apply = (values: Record<string, number>) =>
     body: JSON.stringify(values),
   });
 
-export type ExportFormat = 'step' | 'packandgo';
-
 // Ask the backend to export the rebuilt SolidWorks model, then save it via the browser's download.
 // Returns the downloaded file name.
-export async function exportModel(format: ExportFormat, name: string): Promise<string> {
+export async function exportModel(name: string): Promise<string> {
   let r: Response;
   try {
     r = await fetch(BASE + '/export', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ format, name }),
+      body: JSON.stringify({ format: 'step', name }),
     });
   } catch {
     throw Error('Cannot reach the CAD Vault backend (network request failed).');
@@ -59,7 +57,7 @@ export async function exportModel(format: ExportFormat, name: string): Promise<s
   // File name chosen by the server (sanitised), from the Content-Disposition header.
   const cd = r.headers.get('Content-Disposition') ?? '';
   const m = /filename\*=utf-8''([^;]+)|filename="?([^";]+)"?/i.exec(cd);
-  const file = m ? decodeURIComponent(m[1] ?? m[2]) : `${name}.${format === 'step' ? 'step' : 'zip'}`;
+  const file = m ? decodeURIComponent(m[1] ?? m[2]) : `${name}.step`;
   const url = URL.createObjectURL(await r.blob());
   const a = Object.assign(document.createElement('a'), { href: url, download: file });
   document.body.append(a);

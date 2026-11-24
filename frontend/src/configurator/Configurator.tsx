@@ -1,7 +1,7 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
 import { RotateCw } from 'lucide-react';
 import {
-  apply, exportModel, getNextExportId, getState, type ExportFormat, type Param, type State,
+  apply, exportModel, getNextExportId, getState, type Param, type State,
 } from './api';
 import TablePreview from './TablePreview';
 import './configurator.css';
@@ -27,7 +27,6 @@ export default function Configurator() {
   // Export is allowed only when SolidWorks matches the page: after load, or after an Apply
   // that reached SolidWorks. Any change on the page clears it until the next Apply.
   const [exportable, setExportable] = useState(false);
-  const [format, setFormat] = useState<ExportFormat>('step');
   const [customName, setCustomName] = useState(''); // blank = use the auto name
   const [nextId, setNextId] = useState(''); // e.g. IPT002, added to every export name by the server
 
@@ -74,12 +73,9 @@ export default function Configurator() {
   const runExport = async (name: string) => {
     if (busy || !exportable) return;
     setBusy(true);
-    setStatus({
-      msg: format === 'step' ? 'Exporting STEP...' : 'Running Pack and Go (this can take a minute)...',
-      color: WARN,
-    });
+    setStatus({ msg: 'Exporting STEP...', color: WARN });
     try {
-      const file = await exportModel(format, name);
+      const file = await exportModel(name);
       setStatus({ msg: `Exported ${file}`, color: OK });
     } catch (e) {
       setStatus({ msg: (e as Error).message, color: ERR });
@@ -184,23 +180,15 @@ export default function Configurator() {
             <TablePreview L={L} W={W} H={H} />
           </section>
           <section className="cfgPanel cfgExport">
-        <h2>EXPORT</h2>
+        <h2>EXPORT STEP</h2>
         <div className="cfgExportRow">
-          <div className="cfgFormat" role="radiogroup" aria-label="Export format">
-            {([['step', 'STEP'], ['packandgo', 'PACK AND GO (ZIP)']] as const).map(([f, label]) => (
-              <label key={f} className={format === f ? 'on' : ''}>
-                <input type="radio" name="cfgFormat" checked={format === f} onChange={() => setFormat(f)} />
-                {label}
-              </label>
-            ))}
-          </div>
           <input
             className="cfgName" type="text" aria-label="File name"
             value={customName} placeholder={autoName}
             onChange={e => setCustomName(e.target.value)}
             onKeyDown={e => e.stopPropagation()} // Enter here must not trigger Apply & Rebuild
           />
-          <span className="cfgMuted">_{nextId}.{format === 'step' ? 'step' : 'zip'}</span>
+          <span className="cfgMuted">_{nextId}.step</span>
           <button
             className="cfgApply" disabled={busy || !exportable}
             onClick={() => void runExport(customName.trim() || autoName)}

@@ -77,7 +77,7 @@ def apply(values: dict[str, float]):
 
 
 class ExportRequest(BaseModel):
-    format: Literal["step", "packandgo"]
+    format: Literal["step"] = "step"  # STEP only for now
     name: str  # file name without extension; the page fills in the auto name by default
 
 
@@ -96,28 +96,8 @@ def export_model(req: ExportRequest):
         # The export ID (e.g. IPT002) is only recorded as used if the export succeeds.
         with export_ids.reserve() as export_id:
             name = f"{name}_{export_id}"  # default and custom names both get the ID
-            if req.format == "step":
-                out = work / f"{name}.step"
-                export.export_step(out)
-            else:
-                pack = work / "pack"
-                pack.mkdir()
-                # Copied files get a short dimension code plus the ID, e.g.
-                # TopPlate_L60.25W48H44.5_IPT002.SLDPRT, using the values SolidWorks was last
-                # rebuilt with. The zip itself gets the full export name.
-                v = equations.read_values(
-                    settings.equations_file, ["TableLength", "TableWidth", "TableHeight"]
-                )
-                n = equations._number
-                suffix = (
-                    f"_L{n(v['TableLength'])}W{n(v['TableWidth'])}H{n(v['TableHeight'])}"
-                    f"_{export_id}"
-                )
-                export.pack_and_go(pack, suffix)
-                out = export.zip_folder(pack, work / name)
-    except export.StepError as e:  # already labelled with the step, e.g. 'at "running Pack and Go": ...'
-        shutil.rmtree(work, ignore_errors=True)
-        raise HTTPException(500, f"Export failed {e}")
+            out = work / f"{name}.step"
+            export.export_step(out)
     except Exception as e:
         log.exception("Export failed")  # full details in the server window
         shutil.rmtree(work, ignore_errors=True)

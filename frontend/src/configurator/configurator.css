@@ -164,43 +164,12 @@
 .cfg .cfgExport {
   flex: none;
 }
-/* Two rows: [format choice ......... EXPORT]
-              [file name ............ .step] */
+/* One row: [file name ............ _IPT###.step] [EXPORT] */
 .cfg .cfgExportRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: 'fmt btn' 'name ext';
+  grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
   gap: clamp(10px, 1vw, 16px);
-}
-.cfg .cfgExportRow > .cfgFormat { grid-area: fmt; justify-self: start; }
-.cfg .cfgExportRow > .cfgName { grid-area: name; }
-.cfg .cfgExportRow > .cfgMuted { grid-area: ext; }
-.cfg .cfgExportRow > button { grid-area: btn; }
-.cfg .cfgFormat {
-  display: flex;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.cfg .cfgFormat label {
-  padding: clamp(8px, 1.2vh, 12px) clamp(12px, 1vw, 18px);
-  font: 700 clamp(12px, 0.85vw, 15px) var(--mono);
-  color: var(--muted);
-  cursor: pointer;
-}
-.cfg .cfgFormat label.on {
-  background: var(--accent);
-  color: var(--bg);
-}
-.cfg .cfgFormat input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-.cfg .cfgFormat label:has(input:focus-visible) {
-  outline: 2px solid var(--text);
-  outline-offset: -2px;
 }
 .cfg .cfgName {
   width: 100%;
