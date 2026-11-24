@@ -55,6 +55,17 @@ def _byref_int(pythoncom, client):
     return client.VARIANT(pythoncom.VT_BYREF | pythoncom.VT_I4, 0)
 
 
+def _get(obj, name):
+    """Read a SolidWorks API member that takes no arguments, e.g. GetTitle or GetType.
+
+    With pywin32's late binding, SolidWorks' zero-argument methods are exposed as
+    properties: obj.GetTitle is already the string, and obj.GetTitle() fails with
+    "'str' object is not callable". This works whichever way the member is exposed.
+    """
+    value = getattr(obj, name)
+    return value() if callable(value) and not hasattr(value, "_oleobj_") else value
+
+
 def _active_doc(sw):
     model = sw.ActiveDoc
     if model is None:
@@ -92,13 +103,13 @@ def pack_and_go(out_dir: Path, suffix: str) -> Path:
     """
     with _solidworks() as (sw, pythoncom, client):
         master = _active_doc(sw)
-        if master.GetType() != SW_DOC_ASSEMBLY:
+        if _get(master, "GetType") != SW_DOC_ASSEMBLY:
             raise RuntimeError("The active SolidWorks document is not an assembly")
-        master_path = Path(master.GetPathName())
-        master_title = master.GetTitle()
+        master_path = Path(_get(master, "GetPathName"))
+        master_title = _get(master, "GetTitle")
 
         # 1. Pack and Go: same engine as File > Pack and Go.
-        pgo = master.Extension.GetPackAndGo()
+        pgo = _get(master.Extension, "GetPackAndGo")
         for prop, value in (("IncludeDrawings", True), ("IncludeToolboxComponents", True),
                             ("IncludeSuppressed", True), ("IncludeSimulationResults", False),
                             ("FlattenToSingleFolder", False)):
@@ -130,26 +141,26 @@ def pack_and_go(out_dir: Path, suffix: str) -> Path:
             root = out_dir.resolve()
 
             def in_export(doc) -> bool:
-                return Path(doc.GetPathName()).resolve().is_relative_to(root)
+                return Path(_get(doc, "GetPathName")).resolve().is_relative_to(root)
 
             docs = [copy]
             for comp in copy.GetComponents(False) or []:
-                doc = comp.GetModelDoc2()  # None for suppressed / not loaded components
-                if doc is None or any(doc.GetPathName() == d.GetPathName() for d in docs):
+                doc = _get(comp, "GetModelDoc2")  # None for suppressed / not loaded components
+                if doc is None or any(_get(doc, "GetPathName") == _get(d, "GetPathName") for d in docs):
                     continue
                 if not in_export(doc):
                     raise RuntimeError(
-                        f"Packed copy still references the original {doc.GetPathName()}; "
+                        f"Packed copy still references the original {_get(doc, 'GetPathName')}; "
                         "nothing was changed in the master files"
                     )
                 docs.append(doc)
             try:  # load the values the master was just rebuilt with
-                copy.GetEquationMgr().UpdateValuesFromExternalEquationFile()
+                _get(_get(copy, "GetEquationMgr"), "UpdateValuesFromExternalEquationFile")
             except Exception as e:
                 log.info("equation reload in copy skipped: %s", e)
             copy.ForceRebuild3(False)
             for doc in docs:
-                eq = doc.GetEquationMgr()
+                eq = _get(doc, "GetEquationMgr")
                 if eq is not None and eq.LinkToFile:
                     eq.LinkToFile = False
             copy.ForceRebuild3(False)
@@ -158,9 +169,9 @@ def pack_and_go(out_dir: Path, suffix: str) -> Path:
                     continue
                 e, w = _byref_int(pythoncom, client), _byref_int(pythoncom, client)
                 if not doc.Save3(SW_SAVE_SILENT, e, w):
-                    raise RuntimeError(f"Could not save {doc.GetTitle()} (error code {e.value})")
+                    raise RuntimeError(f"Could not save {_get(doc, 'GetTitle')} (error code {e.value})")
         finally:
-            sw.CloseDoc(copy.GetTitle())
+            sw.CloseDoc(_get(copy, "GetTitle"))
             e = _byref_int(pythoncom, client)
             sw.ActivateDoc3(master_title, False, 0, e)  # hand the master back as active doc
         return copy_path
