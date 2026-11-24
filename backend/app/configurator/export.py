@@ -124,11 +124,25 @@ def pack_and_go(out_dir: Path, suffix: str) -> Path:
         if copy is None:
             raise RuntimeError(f"Could not open the packed assembly (error code {errors.value})")
         try:
+            # Only documents inside the export folder are ever modified or saved. If the copy
+            # still references an original master file (a reference Pack and Go did not
+            # redirect), that file is left untouched and the export fails instead.
+            root = out_dir.resolve()
+
+            def in_export(doc) -> bool:
+                return Path(doc.GetPathName()).resolve().is_relative_to(root)
+
             docs = [copy]
             for comp in copy.GetComponents(False) or []:
                 doc = comp.GetModelDoc2()  # None for suppressed / not loaded components
-                if doc is not None and all(doc.GetPathName() != d.GetPathName() for d in docs):
-                    docs.append(doc)
+                if doc is None or any(doc.GetPathName() == d.GetPathName() for d in docs):
+                    continue
+                if not in_export(doc):
+                    raise RuntimeError(
+                        f"Packed copy still references the original {doc.GetPathName()}; "
+                        "nothing was changed in the master files"
+                    )
+                docs.append(doc)
             try:  # load the values the master was just rebuilt with
                 copy.GetEquationMgr().UpdateValuesFromExternalEquationFile()
             except Exception as e:
@@ -140,6 +154,8 @@ def pack_and_go(out_dir: Path, suffix: str) -> Path:
                     eq.LinkToFile = False
             copy.ForceRebuild3(False)
             for doc in docs:
+                if not in_export(doc):  # belt and braces: never save outside the export folder
+                    continue
                 e, w = _byref_int(pythoncom, client), _byref_int(pythoncom, client)
                 if not doc.Save3(SW_SAVE_SILENT, e, w):
                     raise RuntimeError(f"Could not save {doc.GetTitle()} (error code {e.value})")
