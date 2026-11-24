@@ -190,13 +190,22 @@
   margin: 10px 0 0;
 }
 
+/* Same columns and gap as .cfgGrid, so the button is exactly as wide as the Input Parameters card. */
 .cfg .cfgFoot {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: clamp(14px, 1.3vw, 24px);
   align-items: center;
-  gap: 16px;
   margin-top: clamp(14px, 2vh, 24px);
   font: 700 clamp(12px, 0.9vw, 16px) var(--mono);
+}
+.cfg .cfgFoot > .cfgApply {
+  width: 100%;
+  justify-content: center;
+}
+.cfg .cfgStatus {
+  min-width: 0;
+  overflow-wrap: anywhere; /* long paths and messages wrap instead of widening the page */
 }
 .cfg .cfgApply {
   background: var(--accent);
@@ -216,14 +225,15 @@
   cursor: wait;
 }
 .cfg .cfgPath {
-  margin-top: 6px;
+  margin: 6px 0 0;
 }
 .cfg .cfgError p {
   font: 700 13px var(--mono);
 }
 
 @media (max-width: 800px) {
-  .cfg .cfgGrid {
+  .cfg .cfgGrid,
+  .cfg .cfgFoot {
     grid-template-columns: 1fr;
   }
   /* Stacked: the preview keeps its natural proportions instead of filling leftover height. */

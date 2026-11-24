@@ -204,13 +204,16 @@ export default function Configurator() {
           </section>
         </div>
       </div>
+      {/* Same two columns as the panels above: button under Input Parameters, status on the right. */}
       <div className="cfgFoot">
-        <span style={{ color: status.color }}>{status.msg.toUpperCase()}</span>
         <button className="cfgApply" disabled={busy} onClick={() => void run()}>
           APPLY &amp; REBUILD
         </button>
+        <div className="cfgStatus">
+          <span style={{ color: status.color }}>{status.msg.toUpperCase()}</span>
+          <p className="cfgPath">{state.equations_file}</p>
+        </div>
       </div>
-      <p className="cfgPath">{state.equations_file}</p>
     </div>
   );
 }
