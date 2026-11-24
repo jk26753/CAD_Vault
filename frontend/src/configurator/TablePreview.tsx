@@ -1,11 +1,12 @@
 // Blueprint-style table sketch, ported from the Python tool's canvas drawing.
-const CW = 300, CH = 230, M = 34, K = 0.4;
+// ML: left margin, wider than M so the height label (drawn left of the legs) is not clipped.
+const CW = 300, CH = 230, M = 34, ML = 50, K = 0.4;
 const DIM = '#2f5f73', BRIGHT = '#00d1ff', TEXT = '#e6edf3';
 
 export default function TablePreview({ L, W, H }: { L: number; W: number; H: number }) {
-  const s = Math.min((CW - 2 * M) / (W + K * L), (CH - 2 * M) / (H + 0.6 * K * L));
+  const s = Math.min((CW - ML - M) / (W + K * L), (CH - 2 * M) / (H + 0.6 * K * L));
   const p = (w: number, l: number, h: number): [number, number] =>
-    [M + (w + K * l) * s, CH - M - (h + 0.6 * K * l) * s];
+    [ML + (w + K * l) * s, CH - M - (h + 0.6 * K * l) * s];
   const line = (a: [number, number], b: [number, number], stroke: string, key: string) =>
     <line key={key} x1={a[0]} y1={a[1]} x2={b[0]} y2={b[1]} stroke={stroke} strokeWidth={2} />;
   const poly = (pts: [number, number][]) => pts.map(q => q.join(',')).join(' ');

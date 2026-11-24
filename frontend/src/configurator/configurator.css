@@ -7,9 +7,10 @@
   --muted: #7d8590;
   --accent: #00d1ff;
   --mono: Consolas, 'Cascadia Mono', monospace;
-  max-width: 980px;
-  margin: 28px auto;
-  padding: 0 22px;
+  /* Scales with the window: fills wide screens up to 1600 px, then centres. */
+  max-width: 1600px;
+  margin: clamp(16px, 3vh, 36px) auto;
+  padding: 0 clamp(16px, 2.5vw, 40px);
   color: var(--text);
 }
 
@@ -17,11 +18,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: clamp(14px, 2.2vh, 24px);
 }
 .cfg h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: clamp(22px, 1.7vw, 32px);
   letter-spacing: 0.04em;
 }
 .cfg .cfgHead small,
@@ -29,46 +30,54 @@
 .cfg .cfgPath {
   color: var(--muted);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: clamp(12px, 0.8vw, 14px);
 }
 .cfg .cfgLed {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   transition: background 0.2s;
 }
 
 .cfg .cfgGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: clamp(14px, 1.3vw, 24px);
 }
 .cfg .cfgPanel {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: clamp(14px, 1.4vw, 28px) clamp(16px, 1.6vw, 32px);
+}
+/* Inputs panel: spread rows, cards and checkbox over the panel's full height. */
+.cfg .cfgGrid > .cfgPanel:first-child {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 .cfg h2 {
-  margin: 0 0 8px;
+  margin: 0 0 clamp(8px, 1.2vh, 16px);
   color: var(--accent);
-  font: 700 12px var(--mono);
+  font: 700 clamp(12px, 0.85vw, 15px) var(--mono);
   letter-spacing: 0.08em;
 }
 
 .cfg .cfgRow {
   display: grid;
-  grid-template-columns: 70px 1fr 96px 18px; /* number box fits 119.99 */
+  /* label | slider | number box (fits 119.99) | unit */
+  grid-template-columns: clamp(70px, 5.5vw, 100px) 1fr clamp(96px, 7.5vw, 140px) 22px;
   align-items: center;
-  gap: 12px;
-  padding: 10px 0;
+  gap: clamp(12px, 1.2vw, 22px);
+  padding: clamp(10px, 1.8vh, 20px) 0;
 }
 .cfg .cfgRow label {
   color: var(--muted);
-  font: 700 12px var(--mono);
+  font: 700 clamp(12px, 0.85vw, 15px) var(--mono);
 }
 .cfg input[type='range'] {
   width: 100%;
+  height: 24px; /* larger click/drag target */
   accent-color: var(--accent);
 }
 .cfg input[type='number'] {
@@ -77,8 +86,8 @@
   color: var(--text);
   border: 1px solid var(--border);
   border-radius: 6px;
-  padding: 6px 8px;
-  font: 15px var(--mono);
+  padding: clamp(6px, 0.9vh, 10px) 10px;
+  font: clamp(15px, 1.1vw, 20px) var(--mono);
 }
 .cfg input[type='number']:focus {
   outline: 1px solid var(--accent);
@@ -87,43 +96,45 @@
 .cfg .cfgCards {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
-  margin-top: 10px;
+  gap: clamp(6px, 0.7vw, 12px);
+  margin-top: clamp(10px, 1.6vh, 20px);
 }
 .cfg .cfgCards div {
   background: var(--bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px 4px;
+  border-radius: 8px;
+  padding: clamp(8px, 1.6vh, 18px) 4px;
   text-align: center;
 }
 .cfg .cfgCards small {
   display: block;
   color: var(--muted);
-  font: 10px var(--mono);
+  font: clamp(10px, 0.7vw, 13px) var(--mono);
+  margin-bottom: 4px;
 }
 .cfg .cfgCards b {
   color: var(--accent);
-  font: 700 20px var(--mono);
+  font: 700 clamp(20px, 1.8vw, 34px) var(--mono);
 }
 
 .cfg .cfgCheck {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 14px;
-  font: 700 12px var(--mono);
+  gap: 12px;
+  margin-top: clamp(12px, 2vh, 24px);
+  font: 700 clamp(12px, 0.9vw, 16px) var(--mono);
   cursor: pointer;
 }
 .cfg .cfgCheck input {
-  width: 16px;
-  height: 16px;
+  width: clamp(16px, 1.2vw, 22px);
+  height: clamp(16px, 1.2vw, 22px);
   accent-color: var(--accent);
   cursor: pointer;
 }
 
 .cfg .cfgPreview {
   width: 100%;
+  max-height: calc(100vh - 400px); /* keeps the whole page within the window */
   display: block;
   font: 700 9px var(--mono);
 }
@@ -133,16 +144,16 @@
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  margin-top: 14px;
-  font: 700 12px var(--mono);
+  margin-top: clamp(14px, 2vh, 24px);
+  font: 700 clamp(12px, 0.9vw, 16px) var(--mono);
 }
 .cfg .cfgApply {
   background: var(--accent);
   color: var(--bg);
   border: 0;
-  border-radius: 6px;
-  padding: 10px 20px;
-  font: 700 13px var(--mono);
+  border-radius: 8px;
+  padding: clamp(10px, 1.4vh, 16px) clamp(20px, 2vw, 36px);
+  font: 700 clamp(13px, 0.95vw, 17px) var(--mono);
   cursor: pointer;
   flex-shrink: 0;
 }
