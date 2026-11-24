@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from starlette.background import BackgroundTask
 
-from . import equations, export, export_ids, solidworks
+from . import equations, export, export_ids, solidworks, vault_save
 from .settings import OPTIONS, PARAMS, settings
 
 log = logging.getLogger(__name__)
@@ -79,6 +79,7 @@ def apply(values: dict[str, float]):
 class ExportRequest(BaseModel):
     format: Literal["step"] = "step"  # STEP only for now
     name: str  # file name without extension; the page fills in the auto name by default
+    save_to_vault: bool = False  # also add an entry on the Table Configurations page
 
 
 @router.post("/export")
@@ -92,17 +93,32 @@ def export_model(req: ExportRequest):
         raise HTTPException(422, "File name must contain letters or numbers")
     work = Path(tempfile.mkdtemp(prefix="cadvault_export_"))
     cleanup = BackgroundTask(shutil.rmtree, work, ignore_errors=True)
+    base_name = name
     try:
         # The export ID (e.g. IPT002) is only recorded as used if the export succeeds.
         with export_ids.reserve() as export_id:
-            name = f"{name}_{export_id}"  # default and custom names both get the ID
+            name = f"{base_name}_{export_id}"  # default and custom names both get the ID
             out = work / f"{name}.step"
             export.export_step(out)
     except Exception as e:
         log.exception("Export failed")  # full details in the server window
         shutil.rmtree(work, ignore_errors=True)
         raise HTTPException(500, f"Export failed: {e}")
-    return FileResponse(out, filename=out.name, background=cleanup)
+
+    # Optional: also save to Table Configurations. The download is sent either way; the
+    # outcome is reported in a response header so the page can show it.
+    headers = {}
+    if req.save_to_vault:
+        try:
+            values = equations.read_values(settings.equations_file, NAMES)
+            vault_save.save_configuration(out, export_id, base_name, values)
+            headers["X-CADVault-Saved"] = export_id
+        except Exception as e:
+            log.exception("Saving to Table Configurations failed")
+            # Header values must be plain ASCII.
+            msg = str(e).encode("ascii", "replace").decode()[:300]
+            headers["X-CADVault-Save-Error"] = msg
+    return FileResponse(out, filename=out.name, background=cleanup, headers=headers)
 
 
 def _next_id_or_none():

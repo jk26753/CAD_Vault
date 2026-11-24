@@ -24,6 +24,11 @@ class Model(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
+    # Which page a model belongs to: "vault" (Model Vault) or "table_config" (Table
+    # Configurations, created by the Table Configurator's export).
+    collection: Mapped[str] = mapped_column(String(30), default="vault", index=True)
+    # Table Configurations only: the Configurator inputs used, as JSON.
+    table_config: Mapped[str] = mapped_column(Text, default="")
     files: Mapped[list["File"]] = relationship(cascade="all, delete-orphan")
     prices: Mapped[list["Price"]] = relationship(cascade="all, delete-orphan")
 

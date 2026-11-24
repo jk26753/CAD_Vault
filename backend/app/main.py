@@ -18,6 +18,16 @@ with engine.begin() as c:
         c.execute(
             text("ALTER TABLE models ADD COLUMN design_project VARCHAR(250) DEFAULT ''")
         )
+    # Table Configurations: existing models are filled with collection = 'vault'.
+    if "collection" not in cols:
+        c.execute(
+            text("ALTER TABLE models ADD COLUMN collection VARCHAR(30) DEFAULT 'vault'")
+        )
+    if "table_config" not in cols:
+        c.execute(text("ALTER TABLE models ADD COLUMN table_config TEXT DEFAULT ''"))
+    c.execute(
+        text("CREATE INDEX IF NOT EXISTS ix_models_collection ON models (collection)")
+    )
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
@@ -63,6 +73,9 @@ def output(m):
         "dimension_unit": m.dimension_unit,
         "rom_price": m.rom_price,
         "last_quoted_on": m.last_quoted_on,
+        "collection": m.collection,
+        "table_config": m.table_config,
+        "created_at": m.created_at.isoformat(),
         "files": [
             {
                 "id": f.id,
@@ -85,8 +98,9 @@ def output(m):
 
 
 @app.get("/api/models")
-def models(qs: str = "", db: Session = Depends(get_db)):
-    s = query()
+def models(qs: str = "", collection: str = "vault", db: Session = Depends(get_db)):
+    # Model Vault asks for "vault" (the default); Table Configurations for "table_config".
+    s = query().where(Model.collection == collection)
     if qs:
         t = f"%{qs}%"
         s = s.where(
@@ -97,13 +111,14 @@ def models(qs: str = "", db: Session = Depends(get_db)):
                 Model.design_project.ilike(t),
             )
         )
-    return [output(x) for x in db.scalars(s.order_by(Model.updated_at.desc())).unique()]
+    order = Model.created_at if collection == "table_config" else Model.updated_at
+    return [output(x) for x in db.scalars(s.order_by(order.desc())).unique()]
 
 
 @app.get("/api/tags")
 def tags(db: Session = Depends(get_db)):
     found = {}
-    for raw in db.scalars(select(Model.tags)):
+    for raw in db.scalars(select(Model.tags).where(Model.collection == "vault")):
         for v in (raw or "").split(","):
             tag = v.strip()
             if tag and tag.casefold() not in found:
@@ -131,6 +146,12 @@ def update(mid: int, x: In, db: Session = Depends(get_db)):
     m = db.scalar(query().where(Model.id == mid))
     if not m:
         raise HTTPException(404, "Model not found")
+    if m.collection != "vault":
+        # Table Configurations: only name and description are editable; the other fields
+        # describe the exported STEP file.
+        m.name, m.description = x.name, x.description
+        db.commit()
+        return output(db.scalar(query().where(Model.id == mid)))
     old = (m.rom_price, m.last_quoted_on)
     data = x.model_dump(exclude={"part_number"})
     data["tags"] = normalize_tags(data["tags"])
