@@ -135,7 +135,7 @@ robocopy ".\CAD_Vault_Data" "$env:USERPROFILE\Documents\CAD_Vault_Backup_$(Get-D
 
   | Parameter | Min | Max | Step |
   |---|---|---|---|
-  | TableLength | 24 in (609.6 mm) | 120 in (3048 mm) | 1 in (25.4 mm) |
+  | TableLength | 24 in (609.6 mm) | 120 in (3048 mm) | 0.01 in (0.254 mm) |
   | TableWidth | 24 in (609.6 mm) | 96 in (2438.4 mm) | 6 in (152.4 mm) |
   | TableHeight | 24 in (609.6 mm) | 96 in (2438.4 mm) | 1 in (25.4 mm) |
 
