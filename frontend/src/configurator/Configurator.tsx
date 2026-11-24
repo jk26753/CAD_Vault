@@ -28,7 +28,10 @@ export default function Configurator() {
     try {
       const s = await getState();
       setState(s);
-      setValues(Object.fromEntries(s.params.map(p => [p.name, snap(s.values[p.name], p)])));
+      setValues({
+        ...Object.fromEntries(s.params.map(p => [p.name, snap(s.values[p.name], p)])),
+        ...Object.fromEntries(s.options.map(o => [o.name, s.values[o.name]])),
+      });
       setStatus({ msg: 'Ready', color: OK });
     } catch (e) {
       setState(undefined);
@@ -129,6 +132,17 @@ export default function Configurator() {
               </div>
             ))}
           </div>
+          {/* Like the dimensions, ticking a box only marks a pending change; Apply & Rebuild writes it. */}
+          {state.options.map(o => (
+            <label className="cfgCheck" key={o.name}>
+              <input
+                type="checkbox"
+                checked={values[o.name] === o.on}
+                onChange={e => change(o.name, e.target.checked ? o.on : o.off)}
+              />
+              {o.label}
+            </label>
+          ))}
         </section>
         <section className="cfgPanel">
           <h2>PREVIEW</h2>

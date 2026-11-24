@@ -4,7 +4,11 @@ const BASE = '/api/configurator';
 export type Param = {
   name: string; label: string; min: number; max: number; step: number; slider_step: number;
 };
-export type State = { equations_file: string; params: Param[]; values: Record<string, number> };
+// An on/off option shown as a checkbox: `on` is written when checked, `off` when unchecked.
+export type Option = { name: string; label: string; on: number; off: number };
+export type State = {
+  equations_file: string; params: Param[]; options: Option[]; values: Record<string, number>;
+};
 export type ApplyResult = { saved: boolean; synced: boolean; message: string };
 
 async function call<T>(path: string, init?: RequestInit): Promise<T> {

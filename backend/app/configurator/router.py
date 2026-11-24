@@ -2,10 +2,10 @@
 from fastapi import APIRouter, HTTPException
 
 from . import equations, solidworks
-from .settings import PARAMS, settings
+from .settings import OPTIONS, PARAMS, settings
 
 router = APIRouter(prefix="/api/configurator", tags=["configurator"])
-NAMES = [p[0] for p in PARAMS]
+NAMES = [p[0] for p in PARAMS] + [o[0] for o in OPTIONS]
 
 
 @router.get("/state")
@@ -21,6 +21,8 @@ def state():
         "equations_file": str(path),
         "params": [{"name": n, "label": lb, "min": lo, "max": hi, "step": st, "slider_step": sl}
                    for n, lb, lo, hi, st, sl in PARAMS],
+        "options": [{"name": n, "label": lb, "on": on, "off": off}
+                    for n, lb, on, off in OPTIONS],
         "values": values,
     }
 
@@ -45,6 +47,13 @@ def apply(values: dict[str, float]):
             raise HTTPException(422, f"{name} must be {lo}-{hi} in steps of {step}")
         # Store the exact multiple of the step, rounded to the step's decimal places.
         clean[name] = round(n * step, _decimals(step))
+    for name, _label, on, off in OPTIONS:
+        v = values.get(name)
+        if v is None:
+            raise HTTPException(422, f"Missing value for {name}")
+        if v not in (on, off):
+            raise HTTPException(422, f"{name} must be {on} or {off}")
+        clean[name] = v
     try:
         equations.write_values(settings.equations_file, clean)
     except Exception as e:

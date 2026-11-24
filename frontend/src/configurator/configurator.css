@@ -107,6 +107,21 @@
   font: 700 20px var(--mono);
 }
 
+.cfg .cfgCheck {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  font: 700 12px var(--mono);
+  cursor: pointer;
+}
+.cfg .cfgCheck input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 .cfg .cfgPreview {
   width: 100%;
   display: block;

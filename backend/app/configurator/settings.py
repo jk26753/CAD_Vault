@@ -26,3 +26,10 @@ PARAMS = [
     ("TableWidth", "WIDTH", 24, 96, 6, 6),
     ("TableHeight", "HEIGHT", 24, 96, 0.01, 0.5),
 ]
+
+# On/off options shown as checkboxes.
+# (variable name in equations.txt, label, value when checked, value when unchecked)
+# Casters: the model suppresses the four leveling casters when Casters = 1.
+OPTIONS = [
+    ("Casters", "Add Leveling Casters", 0, 1),
+]
