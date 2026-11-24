@@ -1,9 +1,18 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase,sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from .config import settings
-engine=create_engine(settings.database_url,connect_args={'check_same_thread':False});SessionLocal=sessionmaker(bind=engine)
-class Base(DeclarativeBase):pass
+
+engine = create_engine(settings.database_url, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(bind=engine)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
 def get_db():
- d=SessionLocal()
- try:yield d
- finally:d.close()
+    d = SessionLocal()
+    try:
+        yield d
+    finally:
+        d.close()
