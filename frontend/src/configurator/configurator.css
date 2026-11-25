@@ -7,8 +7,7 @@
   --muted: #7d8590;
   --accent: #00d1ff;
   --mono: Consolas, 'Cascadia Mono', monospace;
-  /* Scales with the window: fills wide screens up to 1600 px, then centres. */
-  max-width: 1600px;
+  /* Fills the window width (no fixed cap); margins and sizes scale with the window. */
   margin: clamp(16px, 3vh, 36px) auto;
   padding: 0 clamp(16px, 2.5vw, 40px);
   color: var(--text);
@@ -47,7 +46,7 @@
 /* Side-by-side layout: the panels fill the window height (minus title, status and path lines). */
 @media (min-width: 801px) {
   .cfg .cfgGrid {
-    height: calc(100vh - 290px);
+    height: calc(100vh - 305px);
     min-height: 440px;
   }
 }

@@ -58,10 +58,9 @@ nav {
   border-color: #7f1d1d;
   background: #2a1117;
 }
+/* Fills the window width (no fixed cap); side margins scale with the window. */
 main {
-  padding: 22px;
-  max-width: 1500px;
-  margin: auto;
+  padding: 22px clamp(16px, 2.5vw, 40px);
 }
 .search {
   display: flex;
@@ -244,7 +243,9 @@ main {
 }
 .viewer,
 .panel {
-  height: 500px;
+  /* Height follows the window, leaving room above for the search bar and title and below for
+     the Files tab, so the detail view fits the screen. Never smaller than 320px. */
+  height: max(280px, calc(100vh - 410px));
   border: 1px solid #263244;
   border-radius: 12px;
   background: #080d15;
@@ -315,6 +316,13 @@ main {
   align-items: center;
   padding: 11px;
   border-bottom: 1px solid #263244;
+}
+/* File names without spaces wrap instead of widening the page. */
+.rows > div {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+.rows > div b {
+  overflow-wrap: anywhere;
 }
 .pricingHeader {
   grid-template-columns: 1fr 160px 160px;
@@ -486,13 +494,27 @@ fieldset {
 }
 @media (max-width: 1000px) {
   .detailLayout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr); /* stacked; content can't force it wider */
   }
   .modelSidebar {
     max-height: none;
   }
   .detailGrid {
     grid-template-columns: 1fr;
+  }
+}
+/* Phones: the search bar's Sort By control wraps below the search box instead of overflowing. */
+@media (max-width: 700px) {
+  .search {
+    flex-wrap: wrap;
+  }
+  .search input {
+    min-width: 0;
+  }
+  /* Detail view: Edit / Delete drop below the title. */
+  .title,
+  .detailActions {
+    flex-wrap: wrap;
   }
 }
 @media (max-width: 900px) {

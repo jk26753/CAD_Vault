@@ -25,3 +25,19 @@
   display: flex;
   align-items: center;
 }
+
+/* Narrow screens (phones): the tool tabs and page buttons wrap onto extra lines instead of
+   pushing the page wider than the screen. */
+@media (max-width: 700px) {
+  header {
+    height: auto;
+    min-height: 68px;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 16px;
+  }
+  .toolTabs,
+  .headerActions nav {
+    flex-wrap: wrap;
+  }
+}
