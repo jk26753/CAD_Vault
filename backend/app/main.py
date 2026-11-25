@@ -28,6 +28,14 @@ with engine.begin() as c:
     c.execute(
         text("CREATE INDEX IF NOT EXISTS ix_models_collection ON models (collection)")
     )
+    # Category renamed; existing models follow (repeatable: does nothing once done).
+    c.execute(
+        text("UPDATE models SET category = :new WHERE category = :old"),
+        {
+            "old": "Robot Mounting (Table/Pedestals/Mobile Carts)",
+            "new": "Robot Tables/Pedestals/Mobile Carts",
+        },
+    )
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,

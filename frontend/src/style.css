@@ -569,17 +569,20 @@ main .search select { background: var(--ui-bg); color: var(--ui-text); border: 1
 /* Coloured strip at the bottom of each card, labelled with the category. */
 .cards article { grid-template-rows: 220px 1fr auto; }
 .cards article .strip {
-  height: auto;
-  min-height: 28px;
-  padding: 6px 16px;
+  /* Always one line, so every card's strip is the same height. If a card is too narrow for
+     the name, it ends in "..." (hover shows the full name). */
+  height: 28px;
+  padding: 0 10px;
   color: #0d1117;
-  font: 700 12px var(--ui-mono);
+  font: 700 12px/28px var(--ui-mono);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  line-height: 1.35;
-  overflow-wrap: anywhere;
+  letter-spacing: 0.02em; /* tight enough for the longest category on the narrowest card (285px) */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .mount .strip { background: #0ea5e9; }
+.plates .strip { background: #818cf8; }
 .eoat .strip { background: #a855f7; }
 .print .strip { background: #22c55e; }
 .tslot .strip { background: #eab308; }

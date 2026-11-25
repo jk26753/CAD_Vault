@@ -18,7 +18,8 @@ import Viewer from './components/Viewer';
 import HeaderActions from './shell/HeaderActions';
 import './style.css';
 const CAT = [
-  'Robot Mounting (Table/Pedestals/Mobile Carts)',
+  'Robot Tables/Pedestals/Mobile Carts', // renamed from "Robot Mounting (Table/Pedestals/Mobile Carts)"
+  'Robot Mounting Plates',
   'Robot EOAT',
   '3D-Printed Accessories',
   'Misc TSLOT Model',
@@ -28,7 +29,7 @@ const CAT = [
   'Misc',
 ];
 const cc = (x: string) =>
-  ['mount', 'eoat', 'print', 'tslot', 'fixture', 'ref', 'sheet', 'misc'][
+  ['mount', 'plates', 'eoat', 'print', 'tslot', 'fixture', 'ref', 'sheet', 'misc'][
     Math.max(0, CAT.indexOf(x))
   ];
 // Local date from the backend's UTC timestamp (stored without a zone).
@@ -150,7 +151,9 @@ export default function App({ collection = 'vault' }: { collection?: 'vault' | '
                     )}
                   </div>
                   {/* Category label on the coloured strip (Table Configurations: one fixed label) */}
-                  <div className="strip">{isCfg ? 'Table Configuration' : x.category}</div>
+                  <div className="strip" title={isCfg ? 'Table Configuration' : x.category}>
+                    {isCfg ? 'Table Configuration' : x.category}
+                  </div>
                 </article>
               );
             })}
