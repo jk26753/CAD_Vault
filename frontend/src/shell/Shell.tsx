@@ -37,14 +37,21 @@ export default function Shell() {
   return (
     <HeaderSlot.Provider value={slot}>
       <header>
-        <nav className="toolTabs">
-          {TOOLS.map(({ path, label, icon: Icon }) => (
-            <a key={path} href={`#/${path}`} className={path === tool.path ? 'on' : ''}>
-              <Icon />
-              {label}
-            </a>
-          ))}
-        </nav>
+        <div className="headerLeft">
+          {/* Company logo (white version for the dark header); clicking it opens the Model Vault. */}
+          <a href="#/vault" className="hdrLogoLink" title="Model Vault">
+            <img src="/logo-white.png" alt="In-Position Technologies" className="hdrLogo" />
+          </a>
+          <span className="hdrDivider" aria-hidden="true" />
+          <nav className="toolTabs">
+            {TOOLS.map(({ path, label, icon: Icon }) => (
+              <a key={path} href={`#/${path}`} className={path === tool.path ? 'on' : ''}>
+                <Icon />
+                {label}
+              </a>
+            ))}
+          </nav>
+        </div>
         <div ref={setSlot} className="headerActions" />
       </header>
       <tool.Page key={tool.path} />

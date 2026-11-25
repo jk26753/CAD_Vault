@@ -245,7 +245,7 @@ main {
 .panel {
   /* Height follows the window, leaving room above for the search bar and title and below for
      the Files tab, so the detail view fits the screen. Never smaller than 320px. */
-  height: max(280px, calc(100vh - 410px));
+  height: max(280px, calc(100vh - 418px)); /* 418 = room for the 76px sticky header, title and Files tab */
   border: 1px solid #263244;
   border-radius: 12px;
   background: #080d15;

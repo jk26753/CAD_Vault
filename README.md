@@ -221,7 +221,9 @@ backend/
   .env.example           template for backend/.env
   configurator.env.example
 frontend/
-  src/shell/             top bar and tool tabs
+  src/shell/             top bar (logo, tool tabs; stays visible when scrolling)
+  public/logo-white.png  company logo, white version for the dark header
+  public/header-gears.svg  gear outlines shown in the header
   src/App.tsx            Model Vault page
   src/components/        3D viewer, tag input, robot selector
   src/workers/           STEP parsing (occt-import-js, runs off the main thread)

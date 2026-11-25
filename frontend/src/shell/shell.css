@@ -1,3 +1,37 @@
+/* Header: stays at the top while the page scrolls; flat charcoal with a cyan bottom line, the
+   company logo on the left, and two faint gear outlines just left of the page buttons. */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 15; /* above page content; dialogs (z-index 20) still cover it */
+  height: 76px;
+  background: url('/header-gears.svg') no-repeat right 330px center / auto 100%, #0d1117;
+  border-bottom: 2px solid #00d1ff;
+  box-shadow: 0 6px 18px #0008;
+}
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  min-width: 0;
+}
+.hdrLogoLink {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  flex-shrink: 0;
+}
+.hdrLogo {
+  display: block;
+  height: 46px;
+  width: auto;
+}
+.hdrDivider {
+  width: 1px;
+  height: 36px;
+  background: #2a313c;
+}
+
 .toolTabs {
   gap: 6px;
 }
@@ -15,10 +49,13 @@
   background: #151c28;
 }
 
+/* Active tab: cyan text with a cyan underline (no box). */
 .toolTabs a.on {
-  color: #e5edf7;
-  background: #151c28;
-  border-color: #344154;
+  color: #00d1ff;
+  background: transparent;
+  border-color: transparent;
+  border-radius: 0;
+  box-shadow: inset 0 -2px 0 #00d1ff;
 }
 
 .headerActions {
@@ -28,7 +65,28 @@
 
 /* Narrow screens (phones): the tool tabs and page buttons wrap onto extra lines instead of
    pushing the page wider than the screen. */
+/* Not enough room between the tabs and the page buttons: drop the gears. */
+@media (max-width: 1350px) {
+  header {
+    background-image: none;
+  }
+}
+
 @media (max-width: 700px) {
+  /* Phones: the wrapped header is tall, so it scrolls away instead of covering the page. */
+  header {
+    position: static;
+  }
+  .hdrLogo {
+    height: 36px;
+  }
+  .hdrDivider {
+    display: none;
+  }
+  .headerLeft {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
   header {
     height: auto;
     min-height: 68px;
