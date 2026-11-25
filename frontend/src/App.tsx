@@ -241,7 +241,7 @@ function Detail({
         <Viewer modelId={m.id} files={m.files} reload={reload} />
         <div className="panel">
           {isCfg ? (
-            <dl>
+            <dl className="cfgFields">
               <dt>Dimensions</dt>
               <dd>
                 {m.dimension_length} &times; {m.dimension_width} &times; {m.dimension_height}{' '}

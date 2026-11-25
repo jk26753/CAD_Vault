@@ -114,6 +114,7 @@ main {
 .body h2 {
   margin: 9px 0;
   line-height: 1.2;
+  overflow-wrap: anywhere; /* names without spaces (e.g. Table_L36.5_W30_...) wrap */
 }
 .body p {
   margin: 4px 0 16px;
@@ -162,7 +163,9 @@ main {
 }
 .detailLayout {
   display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
+  /* Sidebar scales with the window, up to 400px: wide enough for default table names
+     (e.g. Table_L36.5_W30_H28_Casters_2026-11-25) on large screens. */
+  grid-template-columns: clamp(240px, 22vw, 400px) minmax(0, 1fr);
   gap: 16px;
 }
 .modelSidebar {
@@ -173,6 +176,7 @@ main {
   height: fit-content;
   max-height: calc(100vh - 150px);
   overflow: auto;
+  overflow-x: hidden;
 }
 .sidebarHeading {
   padding: 8px 10px;
@@ -191,6 +195,11 @@ main {
   margin: 2px 0;
   padding: 9px 10px;
 }
+.modelSidebar button b {
+  max-width: 100%;
+  text-align: left;
+  overflow-wrap: anywhere; /* long names without spaces wrap instead of overflowing */
+}
 .modelSidebar button small {
   color: #8193a9;
   margin-top: 3px;
@@ -208,6 +217,13 @@ main {
 .title {
   display: flex;
   justify-content: space-between;
+  gap: 16px;
+}
+.title > div:first-child {
+  min-width: 0; /* let a long title wrap instead of pushing the Edit/Delete buttons */
+}
+.title h1 {
+  overflow-wrap: anywhere;
 }
 .detailActions {
   display: flex;
@@ -259,6 +275,11 @@ main {
 .panel dt {
   color: #8193a9;
   padding: 8px;
+}
+/* Table Configurations: shorter labels, so the label column sizes to them and the values get
+   the room (keeps "36.5 x 30 x 28 in" on one line). */
+.panel dl.cfgFields {
+  grid-template-columns: max-content 1fr;
 }
 .panel dd {
   margin: 0;
