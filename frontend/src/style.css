@@ -282,6 +282,9 @@ main {
 .panel dl.cfgFields {
   grid-template-columns: max-content 1fr;
 }
+.panel dd.description {
+  white-space: pre-wrap; /* keep line breaks typed in the description */
+}
 .panel dd {
   margin: 0;
   padding: 8px;
@@ -355,7 +358,8 @@ main {
 }
 .g {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  /* minmax(0, ...) so wide inputs can't push the columns past the dialog's edge */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
 }
 .g > label {
@@ -366,6 +370,8 @@ main {
 .g input,
 .g select,
 .g textarea {
+  width: 100%;
+  min-width: 0;
   background: #090f18;
   border: 1px solid #344154;
   border-radius: 7px;
@@ -379,7 +385,7 @@ fieldset,
 }
 fieldset {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   border: 1px solid #344154;
   padding: 9px;
@@ -454,7 +460,7 @@ fieldset {
 }
 .uploads {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
 }
 .upload {

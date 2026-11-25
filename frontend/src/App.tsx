@@ -279,6 +279,8 @@ function Detail({
                     <span>{t}</span>
                   ))}
               </dd>
+              <dt>Description</dt>
+              <dd className="description">{m.description || '\u2014'}</dd>
             </dl>
           )}
         </div>
