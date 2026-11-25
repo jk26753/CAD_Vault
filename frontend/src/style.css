@@ -566,13 +566,25 @@ main .search select { background: var(--ui-bg); color: var(--ui-text); border: 1
 .cards article { background: var(--ui-panel); border-color: var(--ui-border); border-radius: 10px; }
 .cards article .body { background: var(--ui-panel); }
 .cards article .preview { background: var(--ui-bg); }
-.cards article .strip { height: 4px; align-self: end; }
+/* Coloured strip at the bottom of each card, labelled with the category. */
+.cards article { grid-template-rows: 220px 1fr auto; }
+.cards article .strip {
+  height: auto;
+  min-height: 28px;
+  padding: 6px 16px;
+  color: #0d1117;
+  font: 700 12px var(--ui-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
 .mount .strip { background: #0ea5e9; }
 .eoat .strip { background: #a855f7; }
 .print .strip { background: #22c55e; }
 .tslot .strip { background: #eab308; }
 .fixture .strip { background: #f97316; }
-.ref .strip { background: #64748b; }
+.ref .strip { background: #94a3b8; } /* lighter than before so the dark label stays readable */
 .sheet .strip { background: #14b8a6; }
 .misc .strip { background: #ec4899; }
 .cards .body small { font: 12px var(--ui-mono); color: var(--ui-muted); }

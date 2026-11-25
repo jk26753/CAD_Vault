@@ -140,7 +140,6 @@ export default function App({ collection = 'vault' }: { collection?: 'vault' | '
                       </>
                     ) : (
                       <>
-                        <p>{x.category}</p>
                         <footer>
                           <span>
                             {x.rom_price ? `$${x.rom_price.replace(/^\$/, '')}` : 'No price'}
@@ -150,7 +149,8 @@ export default function App({ collection = 'vault' }: { collection?: 'vault' | '
                       </>
                     )}
                   </div>
-                  <div className="strip" />
+                  {/* Category label on the coloured strip (Table Configurations: one fixed label) */}
+                  <div className="strip">{isCfg ? 'Table Configuration' : x.category}</div>
                 </article>
               );
             })}
