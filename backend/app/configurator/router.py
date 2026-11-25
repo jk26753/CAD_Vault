@@ -113,6 +113,9 @@ def export_model(req: ExportRequest):
             values = equations.read_values(settings.equations_file, NAMES)
             vault_save.save_configuration(out, export_id, base_name, values)
             headers["X-CADVault-Saved"] = export_id
+        except vault_save.DuplicateError as e:
+            # Not an error: the table is already on the page. Header values must be ASCII.
+            headers["X-CADVault-Duplicate"] = str(e).encode("ascii", "replace").decode()[:300]
         except Exception as e:
             log.exception("Saving to Table Configurations failed")
             # Header values must be plain ASCII.

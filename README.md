@@ -175,6 +175,9 @@ Vault itself.
 - Each entry: part number = export ID (e.g. `IPT002`), name = export name, dimensions (in),
   created date, description, and the STEP file under `vault\Models\<IPT###>\Source`. The
   Configurator inputs are also stored (hidden) for future use.
+- **No duplicates:** a table with the same length, width, height and casters as a saved entry is
+  not saved again; the export still downloads and the status line names the existing entry.
+  Deleting an entry allows that configuration to be saved again.
 - Only the name and description can be edited. Deleting an entry removes its stored files.
 - The 3D preview and thumbnail are generated the first time an entry is opened, as for Model
   Vault models.

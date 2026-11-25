@@ -26,6 +26,32 @@ def _safe(s: str) -> str:
     return re.sub(r"[^A-Za-z0-9._-]+", "_", s)[:180]
 
 
+# The inputs that define a table. Two saved tables with the same values are duplicates.
+KEY_NAMES = ("TableLength", "TableWidth", "TableHeight", "Casters")
+
+
+class DuplicateError(RuntimeError):
+    """An identical table (same L, W, H and casters) is already saved."""
+
+
+def _key(values: dict) -> tuple:
+    # Round to well below the Configurator's 0.01 in step, so 80.13 stored as 80.13000000000001
+    # still matches 80.13.
+    return tuple(round(float(values[n]), 4) for n in KEY_NAMES)
+
+
+def find_duplicate(db, values: dict):
+    """Return the saved Table Configurations entry with the same L, W, H and casters, if any."""
+    key = _key(values)
+    for m in db.scalars(select(Model).where(Model.collection == COLLECTION)):
+        try:
+            if _key(json.loads(m.table_config)) == key:
+                return m
+        except (ValueError, KeyError, TypeError):
+            continue  # entry without readable inputs: cannot be compared
+    return None
+
+
 def save_configuration(step_file: Path, part_number: str, name: str, values: dict) -> None:
     """Create the entry and store a copy of step_file under the vault folder.
 
@@ -34,6 +60,11 @@ def save_configuration(step_file: Path, part_number: str, name: str, values: dic
     """
     model_dir = vault_settings.storage_root / "Models" / _safe(part_number)
     with SessionLocal() as db:
+        dup = find_duplicate(db, values)
+        if dup is not None:
+            raise DuplicateError(
+                f'identical table already saved as {dup.part_number} ("{dup.name}")'
+            )
         if db.scalar(select(Model).where(Model.part_number == part_number)):
             raise RuntimeError(f"part number {part_number} already exists")
         if model_dir.exists():

@@ -41,6 +41,7 @@ export type ExportResult = {
   file: string; // downloaded file name
   saved: string | null; // part number of the new Table Configurations entry, if saved
   saveError: string | null; // why saving to Table Configurations failed (the download still worked)
+  duplicate: string | null; // not saved because an identical table is already saved
 };
 
 // Ask the backend to export the rebuilt SolidWorks model, then save it via the browser's download.
@@ -74,5 +75,6 @@ export async function exportModel(name: string, saveToVault: boolean): Promise<E
     file,
     saved: r.headers.get('X-CADVault-Saved'),
     saveError: r.headers.get('X-CADVault-Save-Error'),
+    duplicate: r.headers.get('X-CADVault-Duplicate'),
   };
 }

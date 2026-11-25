@@ -77,7 +77,12 @@ export default function Configurator() {
     setStatus({ msg: 'Exporting STEP...', color: WARN });
     try {
       const r = await exportModel(name, saveToVault);
-      if (r.saveError) {
+      if (r.duplicate) {
+        setStatus({
+          msg: `Exported ${r.file}, NOT saved to Table Configurations: ${r.duplicate}`,
+          color: WARN,
+        });
+      } else if (r.saveError) {
         setStatus({
           msg: `Exported ${r.file}, but NOT saved to Table Configurations: ${r.saveError}`,
           color: ERR,
